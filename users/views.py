@@ -49,6 +49,7 @@ def login(request):
 
 def authenticated_test(request):
     if request.user.is_authenticated:
-        return HttpResponse("you are authenticated")
+        num = request.user.author.number
+        return HttpResponse("your number is {}".format(num))
     else:
         return redirect("login")

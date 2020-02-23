@@ -5,4 +5,5 @@ class Author(models.Model):
     #TODO: this is where we will put friends and stuff
     number = models.IntegerField()
     user = models.OneToOneField(User,
-                                  on_delete=models.CASCADE)
+                                on_delete=models.CASCADE,
+                                related_name='author')
