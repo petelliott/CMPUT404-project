@@ -16,9 +16,9 @@ def signup(request):
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
 
-            author = models.Author.objects.create(number=60)
-            user = models.User.objects.create_user(
-                username=username, password=password, author=author)
+            user = auth.models.User.objects.create_user(
+                username=username, password=password)
+            author = models.Author.objects.create(number=60, user=user)
             auth.login(request, user)
             return redirect("auth_test")
     else:
