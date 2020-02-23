@@ -8,10 +8,11 @@
   <body>
     <div class="mainbar">
       <h1>PolarBear</h1>
+
       {% if user and user.is_authenticated %}
-      welcome
+      <p class="baroption">welcome, {{ user.username }}<p>
       {% else %}
-      don't welcome
+      <a href="{% url 'login' %}" class="buttonlink baroption">log in</a>
       {% endif %}
     </div>
     {% block content %}

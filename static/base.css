@@ -3,8 +3,41 @@ body {
     padding: 0;
 }
 
+* {
+    font-family: sans;
+}
+
+.mainbar * {
+    display: inline-block;
+}
+
 .mainbar {
-    margin: 0;
     background-color: #3f97ba;
-    color: white
+    color: white;
+    position: relative;
+}
+
+.mainbar .baroption {
+    margin:0;
+    float: right;
+    margin-right: 12pt;
+    position: absolute;
+    top: 50%;
+    right: 4pt; /* stupid hack */
+    transform: translateY(-50%);
+}
+
+.buttonlink {
+    text-decoration: none;
+    font-size: 12pt;
+    color: white;
+    background-color: #3f97ba;
+    border: 1pt solid white;
+    padding: 4pt;
+    border-radius: 3pt;
+}
+
+.buttonlink:hover {
+    background-color: white;
+    color: #3f97ba;
 }
