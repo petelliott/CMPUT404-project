@@ -1,7 +1,12 @@
 from django.db import models
-import django.contrib.auth.models
+from django.contrib import auth
+from django.contrib.auth.models import AbstractUser
 
-# Create your models here.
-class User(django.contrib.auth.models.User):
+class Author(models.Model):
     #TODO: this is where we will put friends and stuff
-    pass
+    number = models.IntegerField()
+
+class User(AbstractUser):
+    author = models.OneToOneField(Author,
+                                  on_delete=models.CASCADE,
+                                  null=True)

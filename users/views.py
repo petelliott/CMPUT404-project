@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django import forms
+from users import models
 
 class SignupForm(forms.Form):
     username = forms.CharField()
@@ -11,8 +12,13 @@ def signup(request):
         form = SignupForm(request.POST)
 
         if form.is_valid():
-            return HttpResponse("my form worked")
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
 
+            author = models.Author.objects.create(number=60)
+            models.User.objects.create_user(
+                username=username, password=password, author=author)
+            return redirect("auth_test")
     else:
         form = SignupForm()
 
@@ -22,4 +28,5 @@ def login(request):
     pass
 
 def authenticated_test(request):
+
     return HttpResponse("you are authenticated")
