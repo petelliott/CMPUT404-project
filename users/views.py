@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django import forms
 from users import models
+from django.contrib import auth
 
 class SignupForm(forms.Form):
     username = forms.CharField()
@@ -16,8 +17,9 @@ def signup(request):
             password = form.cleaned_data["password"]
 
             author = models.Author.objects.create(number=60)
-            models.User.objects.create_user(
+            user = models.User.objects.create_user(
                 username=username, password=password, author=author)
+            auth.login(request, user)
             return redirect("auth_test")
     else:
         form = SignupForm()
@@ -25,8 +27,28 @@ def signup(request):
     return render(request, "users/create.html", {"form": form})
 
 def login(request):
-    pass
+    #TODO make seperate login and signup pages
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
+
+            user = auth.authenticate(request, username=username,
+                                     password=password)
+            if user is not None:
+                auth.login(request, user)
+                return redirect("auth_test")
+            else:
+                return redirect("login")
+    else:
+        form = SignupForm()
+
+    return render(request, "users/login.html", {"form": form})
 
 def authenticated_test(request):
-
-    return HttpResponse("you are authenticated")
+    if request.user.is_authenticated:
+        return HttpResponse("you are authenticated")
+    else:
+        return redirect("login")
