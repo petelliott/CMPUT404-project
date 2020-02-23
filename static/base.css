@@ -1,0 +1,10 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.mainbar {
+    margin: 0;
+    background-color: #3f97ba;
+    color: white
+}
