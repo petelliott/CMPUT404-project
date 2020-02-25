@@ -15,12 +15,20 @@ def signup(request):
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
-
-            user = auth.models.User.objects.create_user(
-                username=username, password=password)
-            author = models.Author.objects.create(number=60, user=user)
-            auth.login(request, user)
-            return redirect("auth_test")
+            # Check exist:
+            user = auth.authenticate(request, username=username,
+                                     password=password)
+            if user is not None:
+                auth.login(request, user)
+                return redirect("auth_test")
+                
+            else:
+                user = auth.models.User.objects.create_user(
+                    username=username, password=password)
+                
+                author = models.Author.objects.create(number=60, user=user)
+                auth.login(request, user)
+                return redirect("auth_test")
     else:
         form = SignupForm()
 
@@ -50,7 +58,9 @@ def login(request):
 def authenticated_test(request):
     if request.user.is_authenticated:
         num = request.user.author.number
-        return HttpResponse("your number is {}".format(num))
+        # return HttpResponse("your number is {}".format(num))
+        # return redirect("homepage")
+        return render(request, "users/auth_test.html")
     else:
         return redirect("login")
 

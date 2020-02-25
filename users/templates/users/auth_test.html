@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}PolarBear -- sign up{% endblock %}
+
+{% block content %}
+<p>Login/Signup Successfully!! You will be redirected to home page in <span id="sp">4</span> seconds...</p>
+<script>
+
+	setInterval(go, 1000);
+	var x=3;
+	function go() {
+		if (x>=0){
+			document.getElementById("sp").innerText=x;
+		} else {
+			location.href="/blog/homepage" ;
+		}
+		x--;
+	}
+</script>
+{% endblock %}
