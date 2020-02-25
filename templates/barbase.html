@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block title %}PolarBear{% endblock %}</title>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="{% static 'barbase.css' %}">
+  </head>
+  <body>
+    <div class="mainbar">
+    <h1>PolarBear</h1>
+     <a href="{% url 'post' %}"  class="options">POST</a>
+     <a href="{% url 'friend' %}"  class="options" >FRIEND</a>
+     <a href="{% url 'profile' %}"  class="options">PROFILE</a>
+    </div>
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>
