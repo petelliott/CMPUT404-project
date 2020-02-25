@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django import forms
+from blog import models
 from django.contrib import auth
+import datetime
+import users.models
 
 def homepage(request):
 
@@ -11,9 +14,39 @@ def friend(request):
 
     return render(request,"blog/friend.html" )
 
-def post(request):
 
-    return render(request,"blog/post.html" )
+class PostForm(forms.Form):
+    title = forms.CharField()
+    content = forms.CharField(widget=forms.Textarea)
+
+def post(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    try:
+        author = request.user.author
+    except users.models.Author.DoesNotExist:
+        return redirect("login")
+
+    if request.method == "POST":
+        form = PostForm(request.POST)
+
+        if form.is_valid():
+            author = request.user.author
+
+            title = form.cleaned_data["title"]
+            content = form.cleaned_data["content"]
+            models.Post.objects.create(date=datetime.date.today(),
+                                       title=title,
+                                       content=content,
+                                       author=author)
+
+
+            return redirect("auth_test") #TODO: redirect to created post
+    else:
+        form = PostForm()
+
+    return render(request, "blog/post.html", {"form": form})
 
 def profile(request):
 
