@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django import forms
 from blog import models
@@ -47,6 +47,11 @@ def post(request):
         form = PostForm()
 
     return render(request, "blog/post.html", {"form": form})
+
+def viewpost(request, post_id):
+    #TODO: post view permissions
+    post = get_object_or_404(models.Post, pk=post_id)
+    return render(request, "blog/viewpost.html", {"post": post})
 
 def profile(request):
 
