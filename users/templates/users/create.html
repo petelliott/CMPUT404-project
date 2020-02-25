@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}PolarBear -- sign up{% endblock %}
+
+{% block content %}
+<form action="{% url 'signup' %}" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Submit">
+</form>
+{% endblock %}
