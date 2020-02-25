@@ -55,18 +55,3 @@ def authenticated_test(request):
         return redirect("login")
 
 
-def homepage(request):
-
-    return render(request, "users/homepage.html" )
-
-def friend(request):
-
-    return render(request, "users/homepage.html" )
-
-def post(request):
-
-    return render(request, "users/homepage.html" )
-
-def profile(request):
-
-    return render(request, "users/homepage.html" )
