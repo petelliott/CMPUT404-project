@@ -53,3 +53,5 @@ def authenticated_test(request):
         return HttpResponse("your number is {}".format(num))
     else:
         return redirect("login")
+
+
