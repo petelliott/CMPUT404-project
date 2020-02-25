@@ -1,11 +1,90 @@
+<style>
+body{
+	background: #F9F9F9;
+}
+h3 {
+	font-family: Verdana;
+}
+div.b {
+	font-family: ;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 350px;
+	height: 266px;
+	line-height: 10px;
+	
+
+	border: 1px solid grey;
+	border-radius: 5px;
+	
+	font-size: 14px;
+	background: #ffffff;	
+}
+
+label{
+    display: block;
+    font-family: Verdana;
+    font-style: bold;
+    
+    margin-left: 8%;
+    margin-top: 10px;
+    line-height: 25px;
+    margin-bottom: 10px;
+}
+input{
+	display: block;
+    margin-top: 10px;
+    line-height: 35px;
+    margin-bottom: 10px;
+
+    margin-left: 8%;
+    margin-right: 8%;
+    width: 84%;
+	font-family: Verdana;
+
+	border: 1px solid grey;
+	border-radius: 3px;
+}
+
+input.btn{
+	background: linear-gradient(to top, #53a452, 40%, #68ca66);
+	background: linear-gradient(to bottom, #2e7acd 20%, #5696b7);
+	color: #ffffff;
+}
+
+input.btn:hover{
+	background: linear-gradient(to bottom, #2e7acd 100%, #5696b7);
+	cursor: pointer;
+
+}
+
+</style>
 {% extends "base.html" %}
 
 {% block title %}PolarBear -- log in{% endblock %}
 
 {% block content %}
-<form action="{% url 'login' %}" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Submit">
-</form>
+
+	<h3 align='center'> Log in to PolarBear </h3>
+	<div class = "b">
+	<form action="{% url 'login' %}" method="post" >
+		{% csrf_token %}
+        <label for="id_username">Username</label>
+        <input id="id_username" name="username" 
+                   type="text" class="form-control">
+        <label for="id_password">Password</label>
+        <input id="id_password" name="password" 
+                   type="password" class="form-control">
+    	{% if form.errors %}
+	        <script class=" label label-danger">
+	        	alert("Your username and password didn't match. Please try again.");
+	        </script>
+	    {% endif %}
+
+	  <!-- {{ form.as_p }} -->
+	  <br>
+	  <input type="submit" value="Sign In" class ='btn'>
+	</form>
+</div>
 {% endblock %}
