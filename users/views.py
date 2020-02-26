@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 
-class Login(forms.Form):
+class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
 
@@ -57,7 +57,7 @@ def signup(request):
 def login(request):
     signup_page = False
     if request.method == "POST":
-        form = SignupForm(request.POST)
+        form = LoginForm(request.POST)
 
         if form.is_valid():
             username = form.cleaned_data["username"]
