@@ -53,6 +53,11 @@ def viewpost(request, post_id):
     post = get_object_or_404(models.Post, pk=post_id)
     return render(request, "blog/viewpost.html", {"post": post})
 
+def allposts(request):
+    #TODO: authenticate posts
+    return render(request, "blog/postlist.html",
+                  {"posts": models.Post.objects.all()})
+
 def profile(request):
 
     return render(request, "blog/profile.html" )

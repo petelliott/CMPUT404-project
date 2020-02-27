@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}PolarBear -- posts?{% endblock %}
+{% block content %}
+
+{% for post in posts %}
+<p>
+  <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
+  -- {{ post.author.user.username }}
+</p>
+{% endfor %}
+
+{% endblock %}
