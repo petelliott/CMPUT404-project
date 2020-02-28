@@ -7,5 +7,4 @@ urlpatterns = [
     path('post',views.post,name='post'),
     path('post/<int:post_id>', views.viewpost, name='viewpost'),
     path('posts/all', views.allposts, name='allposts'),
-    path('profile',views.profile,name='profile'),
 ]
