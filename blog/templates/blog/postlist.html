@@ -5,7 +5,8 @@
 {% for post in posts %}
 <p>
   <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
-  -- {{ post.author.user.username }}
+  --
+  <a href="{% url 'profile' post.author.pk %}">{{ post.author.user.username }}</a>
 </p>
 {% endfor %}
 
