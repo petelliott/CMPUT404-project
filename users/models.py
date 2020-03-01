@@ -13,6 +13,16 @@ class Author(models.Model):
     def follow(self, other):
         self.friends.add(other)
 
+    def unfollow(self, other):
+        self.friends.remove(other)
+
+    def follows(self, other):
+        try:
+            self.friends.get(id=other.id)
+            return True
+        except Author.DoesNotExist:
+            return False
+
     def public_posts(self):
         pass
 

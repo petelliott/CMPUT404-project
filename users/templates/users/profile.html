@@ -4,8 +4,15 @@
 
 <h2>{{ author.user.username }}</h2>
 
-<form action="">
+<form action="{% url 'profile' author.pk %}" method="post">
+  {% csrf_token %}
+  {% if not user.is_authenticated %}
+  <input type="submit" value="follow" disabled>
+  {% elif follows %}
+  <input type="submit" value="un-follow">
+  {% else %}
   <input type="submit" value="follow">
+  {% endif %}
 </form>
 <!-- TODO: maybe put the users posts here -->
 
