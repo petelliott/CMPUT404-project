@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django import forms
 from users import models
@@ -27,7 +27,7 @@ def signup(request):
             password = form.cleaned_data["password1"]
             password2 = form.cleaned_data["password2"]
             # Check exist:
-            user = auth.authenticate(request, 
+            user = auth.authenticate(request,
                                      username=username,
                                      password=password)
             if password2 != password:
@@ -41,11 +41,11 @@ def signup(request):
             elif user is not None:
                 auth.login(request, user)
                 return redirect("auth_test")
-                
+
             else:
                 user = auth.models.User.objects.create_user(
                     username=username, password=password)
-                
+
                 author = models.Author.objects.create(number=60, user=user)
                 auth.login(request, user)
                 return redirect("auth_test")
@@ -132,4 +132,25 @@ def authenticated_test(request):
     else:
         return redirect("login")
 
+def profile(request, author_id):
+    author = get_object_or_404(models.Author, pk=author_id)
 
+    if not request.user.is_authenticated:
+        return render(request, "users/profile.html", {"author": author})
+
+    try:
+        you = request.user.author
+    except users.models.Author.DoesNotExist:
+        return render(request, "users/profile.html", {"author": author})
+
+    if request.method == "POST":
+        if request.user.author.follows(author):
+            request.user.author.unfollow(author)
+        else:
+            request.user.author.follow(author)
+
+        return redirect('profile', author_id)
+    else:
+        return render(request, "users/profile.html",
+                      {"author": author,
+                       "follows": you.follows(author)})
