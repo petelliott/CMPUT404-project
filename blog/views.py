@@ -20,12 +20,8 @@ class PostForm(forms.Form):
     content = forms.CharField(widget=forms.Textarea)
 
 def post(request):
-    if not request.user.is_authenticated:
-        return redirect("login")
-
-    try:
-        author = request.user.author
-    except users.models.Author.DoesNotExist:
+    author = users.models.Author.from_user(request.user)
+    if author is None:
         return redirect("login")
 
     if request.method == "POST":
@@ -36,13 +32,13 @@ def post(request):
 
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
-            models.Post.objects.create(date=datetime.date.today(),
-                                       title=title,
-                                       content=content,
-                                       author=author)
+            post = models.Post.objects.create(date=datetime.date.today(),
+                                              title=title,
+                                              content=content,
+                                              author=author)
 
 
-            return redirect("auth_test") #TODO: redirect to created post
+            return redirect("viewpost", post_id=post.pk)
     else:
         form = PostForm()
 

@@ -23,8 +23,23 @@ class Author(models.Model):
         except Author.DoesNotExist:
             return False
 
+
     def public_posts(self):
         pass
 
     def posts_for(self, user):
         pass
+
+    @classmethod
+    def from_user(cls, user):
+        """
+        returns a user's author, or None if it does not have one or
+        isn't authenticated.
+        """
+        if not user.is_authenticated:
+            return None
+
+        try:
+            return user.author
+        except cls.DoesNotExist:
+            return None

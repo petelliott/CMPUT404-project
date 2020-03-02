@@ -135,19 +135,15 @@ def authenticated_test(request):
 def profile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
 
-    if not request.user.is_authenticated:
-        return render(request, "users/profile.html", {"author": author})
-
-    try:
-        you = request.user.author
-    except users.models.Author.DoesNotExist:
+    you = users.models.Author.from_user(request.user)
+    if you is None:
         return render(request, "users/profile.html", {"author": author})
 
     if request.method == "POST":
-        if request.user.author.follows(author):
-            request.user.author.unfollow(author)
+        if you.follows(author):
+            you.unfollow(author)
         else:
-            request.user.author.follow(author)
+            you.follow(author)
 
         return redirect('profile', author_id)
     else:
