@@ -3,18 +3,28 @@
 {% block title %}PolarBear -- sign up{% endblock %}
 
 {% block content %}
+{% if nomatch %}
+<script>
+  alert("Your password didn't match. Please try again.");
+</script>
+{% endif %}
+{% if taken %}
+<script>
+  alert("this username is taken. Please try again.");
+</script>
+{% endif %}
 <h3 align='center' class= 'signup_header'> Create Your Account </h3>
 <div class = "signup_main_block">
 <form action="{% url 'signup' %}" method="post">
   	{% csrf_token %}
 	<label for="id_username" class = 'signup_info'>Username</label>
-	<input id="id_username" name="username" 
+	<input id="id_username" name="username"
 	           type="text" class="form-control">
 	<label for="id_password1" class = 'signup_info'>Password</label>
-	<input id="id_password1" name="password1" 
+	<input id="id_password1" name="password1"
 	           type="password" class="form-control">
     <label for="id_password2" class = 'signup_info'>Confirm Your Password</label>
-    <input id="id_password2" name="password2" 
+    <input id="id_password2" name="password2"
                type="password" class="form-control">
   <!-- {{ form.as_p }} -->
   <br>

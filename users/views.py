@@ -18,7 +18,6 @@ class SignupForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput)
 
 def signup(request):
-    signup_page = True
     if request.method == "POST":
         form = SignupForm(request.POST)
 
@@ -26,36 +25,23 @@ def signup(request):
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
             password2 = form.cleaned_data["password2"]
-            # Check exist:
-            user = auth.authenticate(request,
-                                     username=username,
-                                     password=password)
-            if password2 != password:
-                response = '''  <script class=" label label-danger">
-                                alert("Two passwords didn't match. Please try again.");
-                                location.href="/user/signup"
-                                </script>
-                                '''
-                return HttpResponse(response)
 
-            elif user is not None:
-                auth.login(request, user)
-                return redirect("auth_test")
-
-            else:
-                user = auth.models.User.objects.create_user(
-                    username=username, password=password)
-
-                author = models.Author.objects.create(number=60, user=user)
-                auth.login(request, user)
-                return redirect("auth_test")
+            try:
+                author = models.Author.signup(username, password, password2)
+                auth.login(request, author.user)
+                return redirect("root")
+            except models.Author.UserNameTaken:
+                return render(request, "users/create.html",
+                              {"form": form, "taken": True})
+            except models.Author.PasswordsDontMatch:
+                return render(request, "users/create.html",
+                              {"form": form, "nomatch": True})
     else:
         form = SignupForm()
 
     return render(request, "users/create.html", {"form": form})
 
 def login(request):
-    signup_page = False
     if request.method == "POST":
         form = LoginForm(request.POST)
 

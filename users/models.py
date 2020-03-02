@@ -43,3 +43,25 @@ class Author(models.Model):
             return user.author
         except cls.DoesNotExist:
             return None
+
+    class UserNameTaken(Exception):
+        pass
+
+    class PasswordsDontMatch(Exception):
+        pass
+
+    @classmethod
+    def signup(cls, username, password1, password2):
+        try:
+            User.objects.get(username=username)
+            raise cls.UserNameTaken()
+        except User.DoesNotExist:
+            pass
+
+        if password1 != password2:
+            raise cls.PasswordsDontMatch()
+
+        user = User.objects.create_user(username=username,
+                                        password=password1)
+
+        return cls.objects.create(number=60, user=user)
