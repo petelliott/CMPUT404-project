@@ -6,12 +6,7 @@ from django.contrib import auth
 import datetime
 import users.models
 
-def homepage(request):
-
-    return render(request, "blog/homepage.html" )
-
 def friend(request):
-
     return render(request,"blog/friend.html" )
 
 
@@ -55,5 +50,4 @@ def allposts(request):
                   {"posts": models.Post.objects.all()})
 
 def profile(request):
-
     return render(request, "blog/profile.html" )

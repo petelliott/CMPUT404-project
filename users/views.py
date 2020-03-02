@@ -67,15 +67,10 @@ def login(request):
                                      password=password)
             if user is not None:
                 auth.login(request, user)
-                return redirect("auth_test")
+                return redirect("root")
             else:
-                response = '''  <script class=" label label-danger">
-                                alert("Your username and password didn't match. Please try again.");
-                                location.href="/user/login"
-                                </script>
-                                '''
-
-                return HttpResponse(response)
+                return render(request, "users/login.html",
+                              {"form": form, "nomatch": True})
     else:
         form = SignupForm()
 
@@ -106,36 +101,11 @@ def logout(request):
     else:
         return redirect("login")
 
-def authenticated_test(request):
-    if request.user.is_authenticated:
-        num = request.user.author.number
-        response = '''
-                    <p>Login/Signup Successfully!! You will be redirected to home page in <span id="sp">1</span> seconds...</p>
-                    <script>
-
-                        setInterval(go, 1000);
-                        var x=0;
-                        function go() {
-                            if (x>=0){
-                                document.getElementById("sp").innerText=x;
-                            } else {
-                                location.href="/blog/homepage" ;
-                            }
-                            x--;
-                        }
-                    </script>
-                '''
-        return HttpResponse(response)
-        # return HttpResponse("your number is {}".format(num))
-        # return redirect("homepage")
-        # return render(request, "users/auth_test.html")
-    else:
-        return redirect("login")
 
 def profile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
 
-    you = users.models.Author.from_user(request.user)
+    you = models.Author.from_user(request.user)
     if you is None:
         return render(request, "users/profile.html", {"author": author})
 

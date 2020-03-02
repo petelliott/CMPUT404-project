@@ -50,13 +50,13 @@ body {
     width: 350px;
     height: 266px;
     line-height: 10px;
-    
+
 
     border: 1px solid grey;
     border-radius: 5px;
-    
+
     font-size: 14px;
-    background: #ffffff;    
+    background: #ffffff;
 }
 .login_info{
     display: block;
@@ -110,20 +110,20 @@ body {
     width: 390px;
     height: 336px;
     line-height: 10px;
-    
+
 
     border: 1px solid grey;
     border-radius: 5px;
-    
+
     font-size: 14px;
-    background: #ffffff;    
+    background: #ffffff;
 }
 
 .signup_info{
     display: block;
     font-family: Verdana;
     font-style: bold;
-    
+
     margin-left: 8%;
     margin-top: 10px;
     line-height: 25px;
@@ -140,4 +140,9 @@ body {
     background: linear-gradient(to bottom, #2e7acd 100%, #5696b7);
     cursor: pointer;
 
+}
+
+a.nolinkstyle {
+    text-decoration: none;
+    color: white;
 }
