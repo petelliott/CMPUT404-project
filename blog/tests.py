@@ -26,6 +26,10 @@ class PrivacyTestCase(TestCase):
         self.assertFalse(post.viewable_by(self.author_B.user))
         self.assertFalse(post.viewable_by(self.author_C.user))
 
+        self.assertTrue(post.listable_to(self.author_A.user))
+        self.assertFalse(post.listable_to(self.author_B.user))
+        self.assertFalse(post.listable_to(self.author_C.user))
+
     def test_url_only(self):
         post = Post.objects.create(date=datetime.date.today(),
                                    title="a",
@@ -37,6 +41,10 @@ class PrivacyTestCase(TestCase):
         self.assertTrue(post.viewable_by(self.author_B.user))
         self.assertTrue(post.viewable_by(self.author_C.user))
 
+        self.assertTrue(post.listable_to(self.author_A.user))
+        self.assertFalse(post.listable_to(self.author_B.user))
+        self.assertFalse(post.listable_to(self.author_C.user))
+
     def test_friends(self):
         post = Post.objects.create(date=datetime.date.today(),
                                    title="a",
@@ -47,6 +55,10 @@ class PrivacyTestCase(TestCase):
         self.assertTrue(post.viewable_by(self.author_A.user))
         self.assertTrue(post.viewable_by(self.author_B.user))
         self.assertFalse(post.viewable_by(self.author_C.user))
+
+        self.assertTrue(post.listable_to(self.author_A.user))
+        self.assertTrue(post.listable_to(self.author_B.user))
+        self.assertFalse(post.listable_to(self.author_C.user))
 
     def test_foaf(self):
         #TODO
@@ -62,3 +74,7 @@ class PrivacyTestCase(TestCase):
         self.assertTrue(post.viewable_by(self.author_A.user))
         self.assertTrue(post.viewable_by(self.author_B.user))
         self.assertTrue(post.viewable_by(self.author_C.user))
+
+        self.assertTrue(post.listable_to(self.author_A.user))
+        self.assertTrue(post.listable_to(self.author_B.user))
+        self.assertTrue(post.listable_to(self.author_C.user))

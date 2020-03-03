@@ -39,3 +39,9 @@ class Post(models.Model):
             return False
 
         return False
+
+    def listable_to(self, user):
+        if self.privacy == Privacy.URL_ONLY:
+            return self.author.user == user
+        else:
+            return self.viewable_by(user)
