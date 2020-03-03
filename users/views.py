@@ -14,8 +14,10 @@ class LoginForm(forms.Form):
 
 class SignupForm(forms.Form):
     username = forms.CharField()
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
+    password1 = forms.CharField(widget=forms.PasswordInput,
+                                label="Password")
+    password2 = forms.CharField(widget=forms.PasswordInput,
+                                label="Confirm Your Password")
 
 def signup(request):
     if request.method == "POST":
