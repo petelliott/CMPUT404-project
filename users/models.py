@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from functools import reduce
 
 class Author(models.Model):
     #TODO: this is where we will put friends and stuff
@@ -25,6 +26,18 @@ class Author(models.Model):
 
     def friends_with(self, other):
         return self.follows(other) and other.follows(self)
+
+    def get_friends(self):
+        return self.friends.all().intersection(self.followers.all())
+
+    def friends_posts(self, author):
+        fs = author.get_friends()
+        if not fs.exists():
+            return ()
+
+        return filter(lambda p: p.listable_to(author.user),
+                      reduce(lambda a, b: a.union(b),
+                             (a.posts.all() for a in fs)))
 
     @classmethod
     def from_user(cls, user):

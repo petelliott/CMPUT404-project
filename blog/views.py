@@ -8,10 +8,6 @@ import users.models
 from blog.models import Privacy
 from django.core.exceptions import PermissionDenied
 
-def friend(request):
-    return render(request,"blog/friend.html" )
-
-
 class PostForm(forms.Form):
     title = forms.CharField()
     content = forms.CharField(widget=forms.Textarea)
@@ -59,7 +55,14 @@ def viewpost(request, post_id):
 
 def allposts(request):
     return render(request, "blog/postlist.html",
-                  {"posts": models.Post.objects.filter(privacy=Privacy.PUBLIC)})
+                  {"posts": models.Post.objects.filter(privacy=Privacy.PUBLIC),
+                   "title": "Public Posts"})
 
-def profile(request):
-    return render(request, "blog/profile.html" )
+def friends(request):
+    author = users.models.Author.from_user(request.user)
+    if author is None:
+        return redirect("login")
+
+    return render(request, "blog/postlist.html",
+                  {"posts": author.friends_posts(author),
+                   "title": "Friend's Posts"})
