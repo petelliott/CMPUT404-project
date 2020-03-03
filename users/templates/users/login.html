@@ -4,26 +4,18 @@
 {% block title %}PolarBear -- log in{% endblock %}
 
 {% block content %}
-
-	<h3 align='center' class = 'login_header'> Log in to PolarBear </h3>
-	<div class = "login_main_block">
-	<form action="{% url 'login' %}" method="post" >
-		{% csrf_token %}
-        <label for="id_username" class = 'login_info'>Username</label>
-        <input id="id_username" name="username" 
-                   type="text" class="form-control">
-        <label for="id_password" class = 'login_info'>Password</label>
-        <input id="id_password" name="password" 
-                   type="password" class="form-control">
-    	{% if form.errors %}
-	        <script class=" label label-danger">
-	        	alert("Your username and password didn't match. Please try again.");
-	        </script>
-	    {% endif %}
-
-	  <!-- {{ form.as_p }} -->
-	  <br>
-	  <input type="submit" value="Sign In" class = 'form-control login_btn'>
-	</form>
+{% if nomatch %}
+<script>
+  alert("Your username and password didn't match. Please try again.");
+</script>
+{% endif %}
+<h3 align='center' class = 'login_header'> Log in to PolarBear </h3>
+<div class = "login_main_block">
+  <form action="{% url 'login' %}" method="post" class="loginsignupform" >
+    {% csrf_token %}
+    {{ form }}
+    <br>
+    <input type="submit" value="Sign In" class = 'login_btn'>
+  </form>
 </div>
 {% endblock %}

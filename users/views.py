@@ -14,11 +14,12 @@ class LoginForm(forms.Form):
 
 class SignupForm(forms.Form):
     username = forms.CharField()
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
+    password1 = forms.CharField(widget=forms.PasswordInput,
+                                label="Password")
+    password2 = forms.CharField(widget=forms.PasswordInput,
+                                label="Confirm Your Password")
 
 def signup(request):
-    signup_page = True
     if request.method == "POST":
         form = SignupForm(request.POST)
 
@@ -26,36 +27,23 @@ def signup(request):
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
             password2 = form.cleaned_data["password2"]
-            # Check exist:
-            user = auth.authenticate(request,
-                                     username=username,
-                                     password=password)
-            if password2 != password:
-                response = '''  <script class=" label label-danger">
-                                alert("Two passwords didn't match. Please try again.");
-                                location.href="/user/signup"
-                                </script>
-                                '''
-                return HttpResponse(response)
 
-            elif user is not None:
-                auth.login(request, user)
-                return redirect("auth_test")
-
-            else:
-                user = auth.models.User.objects.create_user(
-                    username=username, password=password)
-
-                author = models.Author.objects.create(number=60, user=user)
-                auth.login(request, user)
-                return redirect("auth_test")
+            try:
+                author = models.Author.signup(username, password, password2)
+                auth.login(request, author.user)
+                return redirect("root")
+            except models.Author.UserNameTaken:
+                return render(request, "users/create.html",
+                              {"form": form, "taken": True})
+            except models.Author.PasswordsDontMatch:
+                return render(request, "users/create.html",
+                              {"form": form, "nomatch": True})
     else:
         form = SignupForm()
 
     return render(request, "users/create.html", {"form": form})
 
 def login(request):
-    signup_page = False
     if request.method == "POST":
         form = LoginForm(request.POST)
 
@@ -67,17 +55,12 @@ def login(request):
                                      password=password)
             if user is not None:
                 auth.login(request, user)
-                return redirect("auth_test")
+                return redirect("root")
             else:
-                response = '''  <script class=" label label-danger">
-                                alert("Your username and password didn't match. Please try again.");
-                                location.href="/user/login"
-                                </script>
-                                '''
-
-                return HttpResponse(response)
+                return render(request, "users/login.html",
+                              {"form": form, "nomatch": True})
     else:
-        form = SignupForm()
+        form = LoginForm()
 
     return render(request, "users/login.html", {"form": form})
 
@@ -106,48 +89,19 @@ def logout(request):
     else:
         return redirect("login")
 
-def authenticated_test(request):
-    if request.user.is_authenticated:
-        num = request.user.author.number
-        response = '''
-                    <p>Login/Signup Successfully!! You will be redirected to home page in <span id="sp">1</span> seconds...</p>
-                    <script>
-
-                        setInterval(go, 1000);
-                        var x=0;
-                        function go() {
-                            if (x>=0){
-                                document.getElementById("sp").innerText=x;
-                            } else {
-                                location.href="/blog/homepage" ;
-                            }
-                            x--;
-                        }
-                    </script>
-                '''
-        return HttpResponse(response)
-        # return HttpResponse("your number is {}".format(num))
-        # return redirect("homepage")
-        # return render(request, "users/auth_test.html")
-    else:
-        return redirect("login")
 
 def profile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
 
-    if not request.user.is_authenticated:
-        return render(request, "users/profile.html", {"author": author})
-
-    try:
-        you = request.user.author
-    except users.models.Author.DoesNotExist:
+    you = models.Author.from_user(request.user)
+    if you is None:
         return render(request, "users/profile.html", {"author": author})
 
     if request.method == "POST":
-        if request.user.author.follows(author):
-            request.user.author.unfollow(author)
+        if you.follows(author):
+            you.unfollow(author)
         else:
-            request.user.author.follow(author)
+            you.follow(author)
 
         return redirect('profile', author_id)
     else:
