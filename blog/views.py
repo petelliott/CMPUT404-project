@@ -5,6 +5,7 @@ from blog import models
 from django.contrib import auth
 import datetime
 import users.models
+from blog.models import Privacy
 
 def friend(request):
     return render(request,"blog/friend.html" )
@@ -13,6 +14,13 @@ def friend(request):
 class PostForm(forms.Form):
     title = forms.CharField()
     content = forms.CharField(widget=forms.Textarea)
+    privacy = forms.IntegerField(widget=forms.Select(choices=(
+        (Privacy.PUBLIC, "Public"),
+        (Privacy.PRIVATE, "Private"),
+        (Privacy.URL_ONLY, "Shareable by url only"),
+        (Privacy.FRIENDS, "Friends only"),
+        (Privacy.FOAF, "Friends of friends"),
+    )))
 
 def post(request):
     author = users.models.Author.from_user(request.user)
@@ -27,10 +35,12 @@ def post(request):
 
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
+            privacy = form.cleaned_data["privacy"]
             post = models.Post.objects.create(date=datetime.date.today(),
                                               title=title,
                                               content=content,
-                                              author=author)
+                                              author=author,
+                                              privacy=privacy)
 
 
             return redirect("viewpost", post_id=post.pk)
