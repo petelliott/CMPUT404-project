@@ -72,7 +72,10 @@ def edit(request, post_id):
 def viewpost(request, post_id):
     #TODO: post view permissions
     post = get_object_or_404(models.Post, pk=post_id)
-    return render(request, "blog/viewpost.html", {"post": post})
+    author = users.models.Author.from_user(request.user)
+
+    return render(request, "blog/viewpost.html",
+                  {"post": post, "edit": author == post.author})
 
 def allposts(request):
     #TODO: authenticate posts
