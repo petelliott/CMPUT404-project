@@ -23,12 +23,8 @@ class Author(models.Model):
         except Author.DoesNotExist:
             return False
 
-
-    def public_posts(self):
-        pass
-
-    def posts_for(self, user):
-        pass
+    def friends_with(self, other):
+        return self.follows(other) and other.follows(self)
 
     @classmethod
     def from_user(cls, user):

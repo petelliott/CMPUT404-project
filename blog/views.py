@@ -6,6 +6,7 @@ from django.contrib import auth
 import datetime
 import users.models
 from blog.models import Privacy
+from django.core.exceptions import PermissionDenied
 
 def friend(request):
     return render(request,"blog/friend.html" )
@@ -50,14 +51,15 @@ def post(request):
     return render(request, "blog/post.html", {"form": form})
 
 def viewpost(request, post_id):
-    #TODO: post view permissions
     post = get_object_or_404(models.Post, pk=post_id)
+    if not post.viewable_by(request.user):
+        raise PermissionDenied
+
     return render(request, "blog/viewpost.html", {"post": post})
 
 def allposts(request):
-    #TODO: authenticate posts
     return render(request, "blog/postlist.html",
-                  {"posts": models.Post.objects.all()})
+                  {"posts": models.Post.objects.filter(privacy=Privacy.PUBLIC)})
 
 def profile(request):
     return render(request, "blog/profile.html" )
