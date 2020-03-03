@@ -29,8 +29,9 @@ class Post(models.Model):
         if viewer is None:
             return False
 
-        if self.privacy == Privacy.PRIVATE:
-            return self.author == viewer
+        if self.author == viewer:
+            return True
+
         elif self.privacy == Privacy.FRIENDS:
             return self.author.friends_with(viewer)
         elif self.privacy == Privacy.FOAF:
