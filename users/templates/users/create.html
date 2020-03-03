@@ -15,7 +15,7 @@
 {% endif %}
 <h3 align='center' class= 'signup_header'> Create Your Account </h3>
 <div class = "signup_main_block">
-<form action="{% url 'signup' %}" method="post">
+<form action="{% url 'signup' %}" method="post" class="loginsignupform">
   	{% csrf_token %}
 	<label for="id_username" class = 'signup_info'>Username</label>
 	<input id="id_username" name="username"
@@ -28,7 +28,7 @@
                type="password" class="form-control">
   <!-- {{ form.as_p }} -->
   <br>
-  <input type="submit" value="Sign Up" class = 'form-control signup_btn'>
+  <input type="submit" value="Sign Up" class = 'signup_btn'>
 </form>
 </div>
 

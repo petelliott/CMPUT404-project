@@ -58,7 +58,7 @@ def login(request):
                 return render(request, "users/login.html",
                               {"form": form, "nomatch": True})
     else:
-        form = SignupForm()
+        form = LoginForm()
 
     return render(request, "users/login.html", {"form": form})
 
