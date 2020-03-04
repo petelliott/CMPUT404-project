@@ -1,10 +1,14 @@
 {% extends "base.html" %}
-{% block title %}PolarBear -- Postpage{% endblock %}
+{% block title %}{{ post.title }}{% endblock %}
 {% block content %}
 
 <h2>{{ post.title }}</h2>
 <p><a href="{% url 'profile' post.author.pk %}">{{ post.author.user.username }}</a>
- -- {{ post.date }}</p>
+  -- {{ post.date }}</p>
+
+{% if edit %}
+<p><a href="{% url 'edit' post.pk %}">edit</a></p>
+{% endif %}
 
 <p>{{ post.content }}</p>
 
