@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django import forms
 from blog import models
 from django.contrib import auth
+from django.core.exceptions import PermissionDenied
 import datetime
 import users.models
 from blog.models import Privacy
@@ -46,12 +47,43 @@ def post(request):
 
     return render(request, "blog/post.html", {"form": form})
 
+def edit(request, post_id):
+    """
+    view to edit the post with pk=post_id
+    """
+    post = get_object_or_404(models.Post, pk=post_id)
+    author = users.models.Author.from_user(request.user)
+
+    if author != post.author:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = PostForm(request.POST)
+
+        if form.is_valid():
+            author = request.user.author
+
+            post.title = form.cleaned_data["title"]
+            post.content = form.cleaned_data["content"]
+            post.save()
+
+            return redirect("viewpost", post_id=post.pk)
+    else:
+        form = PostForm(initial={"title": post.title,
+                                 "content": post.content})
+
+    return render(request, "blog/edit.html",
+                  {"form": form, "post": post})
+
+
 def viewpost(request, post_id):
     post = get_object_or_404(models.Post, pk=post_id)
     if not post.viewable_by(request.user):
         raise PermissionDenied
 
-    return render(request, "blog/viewpost.html", {"post": post})
+    author = users.models.Author.from_user(request.user)
+    return render(request, "blog/viewpost.html",
+                  {"post": post, "edit": author == post.author})
 
 def allposts(request):
     return render(request, "blog/postlist.html",
