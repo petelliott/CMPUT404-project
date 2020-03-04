@@ -64,5 +64,5 @@ def friends(request):
         return redirect("login")
 
     return render(request, "blog/postlist.html",
-                  {"posts": author.friends_posts(author),
+                  {"posts": author.friends_posts(),
                    "title": "Friend's Posts"})
