@@ -20,6 +20,10 @@ class PostForm(forms.Form):
         (Privacy.FRIENDS, "Friends only"),
         (Privacy.FOAF, "Friends of friends"),
     )))
+    content_type = forms.CharField(widget=forms.Select(choices=(
+        ("text/plain", "Plain Text"),
+        ("text/markdown", "Markdown"),
+    )))
 
 def post(request):
     author = users.models.Author.from_user(request.user)
@@ -35,10 +39,12 @@ def post(request):
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
             privacy = form.cleaned_data["privacy"]
+            content_type = form.cleaned_data["content_type"]
             post = models.Post.objects.create(date=datetime.date.today(),
                                               title=title,
                                               content=content,
                                               author=author,
+                                              content_type=content_type,
                                               privacy=privacy)
 
 
