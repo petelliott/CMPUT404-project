@@ -7,7 +7,7 @@
   -- {{ post.date }}</p>
 
 {% if edit %}
-<p><a href="{% url 'edit' post.pk %}">edit</a></p>
+<p><a class="buttonlink" href="{% url 'edit' post.pk %}">edit</a></p>
 {% endif %}
 
 <p>{{ post.content }}</p>
