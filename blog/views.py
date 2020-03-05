@@ -9,6 +9,7 @@ import users.models
 from blog.models import Privacy
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
+import commonmark
 
 class PostForm(forms.Form):
     title = forms.CharField()
@@ -102,8 +103,14 @@ def viewpost(request, post_id):
         raise PermissionDenied
 
     author = users.models.Author.from_user(request.user)
+    if post.content_type == "text/markdown":
+        content = commonmark.commonmark(post.content)
+    else:
+        content = post.content
+
     return render(request, "blog/viewpost.html",
-                  {"post": post, "edit": author == post.author})
+                  {"post": post, "edit": author == post.author,
+                   "content": content})
 
 def allposts(request):
     return render(request, "blog/postlist.html",
