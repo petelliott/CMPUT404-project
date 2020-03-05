@@ -6,14 +6,19 @@ from django.contrib import auth
 from django.core.exceptions import PermissionDenied
 import datetime
 import users.models
-
-def friend(request):
-    return render(request,"blog/friend.html" )
-
+from blog.models import Privacy
+from django.core.exceptions import PermissionDenied
 
 class PostForm(forms.Form):
     title = forms.CharField()
     content = forms.CharField(widget=forms.Textarea)
+    privacy = forms.IntegerField(widget=forms.Select(choices=(
+        (Privacy.PUBLIC, "Public"),
+        (Privacy.PRIVATE, "Private"),
+        (Privacy.URL_ONLY, "Shareable by url only"),
+        (Privacy.FRIENDS, "Friends only"),
+        (Privacy.FOAF, "Friends of friends"),
+    )))
 
 def post(request):
     author = users.models.Author.from_user(request.user)
@@ -28,10 +33,12 @@ def post(request):
 
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
+            privacy = form.cleaned_data["privacy"]
             post = models.Post.objects.create(date=datetime.date.today(),
                                               title=title,
                                               content=content,
-                                              author=author)
+                                              author=author,
+                                              privacy=privacy)
 
 
             return redirect("viewpost", post_id=post.pk)
@@ -58,29 +65,38 @@ def edit(request, post_id):
 
             post.title = form.cleaned_data["title"]
             post.content = form.cleaned_data["content"]
+            post.privacy = form.cleaned_data["privacy"]
             post.save()
 
             return redirect("viewpost", post_id=post.pk)
     else:
         form = PostForm(initial={"title": post.title,
-                                 "content": post.content})
+                                 "content": post.content,
+                                 "privacy": post.privacy})
 
     return render(request, "blog/edit.html",
                   {"form": form, "post": post})
 
 
 def viewpost(request, post_id):
-    #TODO: post view permissions
     post = get_object_or_404(models.Post, pk=post_id)
-    author = users.models.Author.from_user(request.user)
+    if not post.viewable_by(request.user):
+        raise PermissionDenied
 
+    author = users.models.Author.from_user(request.user)
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author})
 
 def allposts(request):
-    #TODO: authenticate posts
     return render(request, "blog/postlist.html",
-                  {"posts": models.Post.objects.all()})
+                  {"posts": models.Post.objects.filter(privacy=Privacy.PUBLIC),
+                   "title": "Public Posts"})
 
-def profile(request):
-    return render(request, "blog/profile.html" )
+def friends(request):
+    author = users.models.Author.from_user(request.user)
+    if author is None:
+        return redirect("login")
+
+    return render(request, "blog/postlist.html",
+                  {"posts": author.friends_posts(),
+                   "title": "Friend's Posts"})
