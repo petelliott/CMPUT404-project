@@ -22,5 +22,6 @@ urlpatterns = [
     path('', lambda req: redirect('allposts'), name="root"),
     path('user/', include('users.urls')),
     path('blog/', include('blog.urls')),
+    path('api/', include('api.urls')),
     path('admin/', admin.site.urls),
 ]
