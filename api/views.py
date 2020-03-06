@@ -31,3 +31,7 @@ def author_friendswith(request, author_id, author_id2):
 
 def friendrequest(request):
     pass
+
+
+def author(request, author_id):
+    pass

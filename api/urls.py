@@ -18,4 +18,6 @@ urlpatterns = [
          name="api_authorfriendswith"),
     path('friendrequest', views.friendrequest,
          name="api_friendrequest"),
+    path('author/<int:author_id>', views.author,
+         name="api_author"),
 ]
