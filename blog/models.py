@@ -14,7 +14,7 @@ class Post(models.Model):
     date = models.DateField()
     title = models.CharField(max_length=150)
     content = models.CharField(max_length=8192)
-    markdown = models.BooleanField(default=False)
+    content_type = models.CharField(max_length=150)
     author = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='posts')
     privacy = models.IntegerField(default=Privacy.PUBLIC)

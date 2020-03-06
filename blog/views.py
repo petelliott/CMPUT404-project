@@ -9,6 +9,7 @@ import users.models
 from blog.models import Privacy
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
+import commonmark
 
 class PostForm(forms.Form):
     title = forms.CharField()
@@ -19,6 +20,10 @@ class PostForm(forms.Form):
         (Privacy.URL_ONLY, "Shareable by url only"),
         (Privacy.FRIENDS, "Friends only"),
         (Privacy.FOAF, "Friends of friends"),
+    )))
+    content_type = forms.CharField(widget=forms.Select(choices=(
+        ("text/plain", "Plain Text"),
+        ("text/markdown", "Markdown"),
     )))
 
 def post(request):
@@ -35,10 +40,12 @@ def post(request):
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
             privacy = form.cleaned_data["privacy"]
+            content_type = form.cleaned_data["content_type"]
             post = models.Post.objects.create(date=datetime.date.today(),
                                               title=title,
                                               content=content,
                                               author=author,
+                                              content_type=content_type,
                                               privacy=privacy)
 
 
@@ -67,13 +74,15 @@ def edit(request, post_id):
             post.title = form.cleaned_data["title"]
             post.content = form.cleaned_data["content"]
             post.privacy = form.cleaned_data["privacy"]
+            post.content_type = form.cleaned_data["content_type"]
             post.save()
 
             return redirect("viewpost", post_id=post.pk)
     else:
         form = PostForm(initial={"title": post.title,
                                  "content": post.content,
-                                 "privacy": post.privacy})
+                                 "privacy": post.privacy,
+                                 "content_type": post.content_type})
 
     return render(request, "blog/edit.html",
                   {"form": form, "post": post})
@@ -96,8 +105,14 @@ def viewpost(request, post_id):
         raise PermissionDenied
 
     author = users.models.Author.from_user(request.user)
+    if post.content_type == "text/markdown":
+        content = commonmark.commonmark(post.content)
+    else:
+        content = post.content
+
     return render(request, "blog/viewpost.html",
-                  {"post": post, "edit": author == post.author})
+                  {"post": post, "edit": author == post.author,
+                   "content": content})
 
 def allposts(request):
     return render(request, "blog/postlist.html",
