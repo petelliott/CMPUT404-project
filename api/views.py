@@ -19,3 +19,15 @@ def post(request, post_id):
 
 def post_comments(request, post_id):
     pass
+
+
+def author_friends(request, author_id):
+    pass
+
+
+def author_friendswith(request, author_id, author_id2):
+    pass
+
+
+def friendrequest(request):
+    pass
