@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +26,7 @@ SECRET_KEY = 'q=j4!_yn)g5_2g#*olgvd@%s%wg=9ve2lxkm=nolzuut=edyr3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["cmput404w20t06.herokuapp.com"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -128,3 +129,5 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 #AUTH_USER_MODEL = 'users.User'
+
+django_heroku.settings(locals())

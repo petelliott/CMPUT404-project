@@ -1,6 +1,6 @@
 db.sqlite3
 __pycache__
-staticroot/
+staticfiles/
 
 # macOS layout file
 .DS_Store
