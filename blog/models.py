@@ -11,12 +11,14 @@ class Privacy:
 
 # Create your models here.
 class Post(models.Model):
-    date = models.DateField()
-    title = models.CharField(max_length=150)
-    content = models.CharField(max_length=8192)
+    date         = models.DateField()
+    title        = models.CharField(max_length=150)
+    content      = models.CharField(max_length=8192)
     content_type = models.CharField(max_length=150)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE,
+    author       = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='posts')
+    
+    image = models.ImageField(upload_to='post_image/',blank = True)
     privacy = models.IntegerField(default=Privacy.PUBLIC)
 
     def viewable_by(self, user):

@@ -6,7 +6,7 @@ from django.contrib import auth
 from django.core.exceptions import PermissionDenied
 import datetime
 import users.models
-from blog.models import Privacy
+from blog.models import Privacy, Post
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 import commonmark
@@ -21,10 +21,14 @@ class PostForm(forms.Form):
         (Privacy.FRIENDS, "Friends only"),
         (Privacy.FOAF, "Friends of friends"),
     )))
+    image = forms.ImageField(label = 'Choose an Image')
     content_type = forms.CharField(widget=forms.Select(choices=(
         ("text/plain", "Plain Text"),
         ("text/markdown", "Markdown"),
     )))
+
+
+
 
 def post(request):
     author = users.models.Author.from_user(request.user)
@@ -32,7 +36,7 @@ def post(request):
         return redirect("login")
 
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = PostForm(request.POST,request.FILES)
 
         if form.is_valid():
             author = request.user.author
@@ -41,12 +45,16 @@ def post(request):
             content = form.cleaned_data["content"]
             privacy = form.cleaned_data["privacy"]
             content_type = form.cleaned_data["content_type"]
+            image = form['image']
+            form.save()
             post = models.Post.objects.create(date=datetime.date.today(),
                                               title=title,
                                               content=content,
                                               author=author,
                                               content_type=content_type,
+                                              image = image,
                                               privacy=privacy)
+
 
 
             return redirect("viewpost", post_id=post.pk)
