@@ -33,8 +33,6 @@ class PostsTestCase(TestCase):
         self.assertEqual(j["query"], "posts")
         self.assertEqual(j["count"], 3)
         self.assertEqual(j["size"], 25)
-        self.assertTrue("next" not in j)
-        self.assertTrue("previous" not in j)
         self.assertEqual(len(j["posts"]), 3)
 
     def test_post_content(self):
@@ -60,3 +58,20 @@ class PostsTestCase(TestCase):
         self.assertEqual(exp.pk, act["id"])
         self.assertEqual("PUBLIC", act["visibility"])
         self.assertEqual(False, act["unlisted"])
+
+    def test_pagnation(self):
+        j = self.c.get("/api/posts").json()
+        self.assertTrue("next" not in j)
+        self.assertTrue("previous" not in j)
+        self.assertEqual(3, len(j["posts"]))
+
+        j = self.c.get("/api/posts?page=0&size=2").json()
+        self.assertEqual("http://testserver/api/posts?page=1&size=2", j["next"])
+        self.assertTrue("previous" not in j)
+        self.assertEqual(2, len(j["posts"]))
+
+        j = self.c.get("/api/posts?page=1&size=2").json()
+        self.assertTrue("next" not in j)
+        self.assertEqual("http://testserver/api/posts?page=0&size=2",
+                         j["previous"])
+        self.assertEqual(1, len(j["posts"]))
