@@ -45,3 +45,7 @@ class Post(models.Model):
             return self.author.user == user
         else:
             return self.viewable_by(user)
+
+    @classmethod
+    def public(cls):
+        return cls.objects.filter(privacy=Privacy.PUBLIC).order_by("-pk")

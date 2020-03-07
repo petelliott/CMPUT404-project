@@ -1,12 +1,86 @@
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.urls import reverse
+from blog.util import paginate
+from blog.models import Privacy
+import blog
 
-# Create your views here.
+def auth_api(func):
+    def inner(request):
+        #TODO: authenticate with HTTP basic auth
+        return func(request)
+
+    return inner
+
+@auth_api
 def author_posts(request):
-    pass
+    #TODO: maybe authors can use the api?
+    #      until then it's the same as posts
+    return posts()
+
+DEFAULT_PAGE_SIZE = 25
+
+def api_reverse(request, path, **kwargs):
+    return request.build_absolute_uri(reverse(path, kwargs=kwargs))
+
+def serialize_post(request, post):
+    visibility_table = {
+        Privacy.PRIVATE: "PRIVATE",
+        Privacy.URL_ONLY: "PUBLIC",
+        Privacy.FRIENDS: "FRIENDS",
+        Privacy.FOAF: "FOAF",
+        Privacy.PUBLIC: "PUBLIC",
+    }
+    return {
+        "title": post.title,
+        "source": api_reverse(request, "api_post", post_id=post.pk),
+        "origin": api_reverse(request, "api_post", post_id=post.pk),
+        "description": None, #TODO
+        "contentType": post.content_type,
+        "content": post.content, #TODO: images
+        "author": {
+            "id": api_reverse(request, "api_author",
+                              author_id=post.author.pk),
+            "host": api_reverse(request, "api_root"),
+            "displayName": post.author.user.username,
+            "url": api_reverse(request, "api_author",
+                               author_id=post.author.pk),
+            "github": None #TODO
+        },
+        #TODO: comments
+        "published": post.date,
+        "id": post.pk,
+        "visibility": visibility_table[post.privacy],
+        "visibleTo": None,
+        "unlisted": post.privacy == Privacy.URL_ONLY
+    }
 
 
+@auth_api
 def posts(request):
-    pass
+    page = int(request.GET.get("page", 0))
+    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
+
+    public = blog.models.Post.public()
+    total = public.count()
+
+    def pageurl(n):
+        return "{}?page={}&size={}".format(
+            api_reverse(request, "api_posts"),
+            n, size)
+
+    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
+    prev = {"previous": pageurl(page-1) } if page > 0 else {}
+
+    posts = list(paginate(public, page, size))
+    return JsonResponse({
+        "query": "posts",
+        "count": total,
+        "size": size,
+        **nex,
+        **prev,
+        "posts": [serialize_post(request, p) for p in posts]
+    })
 
 
 def authorid_posts(request, author_id):
