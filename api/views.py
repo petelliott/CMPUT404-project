@@ -50,13 +50,23 @@ def posts(request):
 
     public = blog.models.Post.public()
     total = public.count()
+    print(request.path)
+
+    def pageurl(n):
+        return "{}?page={}&size={}".format(
+            api_reverse(request, "api_posts"),
+            n, size)
+
+    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
+    prev = {"previous": pageurl(page-1) } if page > 0 else {}
 
     posts = list(paginate(public, page, size))
     return JsonResponse({
         "query": "posts",
         "count": total,
         "size": size,
-        #TODO: next and previous
+        **nex,
+        **prev,
         "posts": [serialize_post(request, p) for p in posts]
     })
 
