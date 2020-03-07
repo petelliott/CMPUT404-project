@@ -8,10 +8,12 @@
   </head>
   <body>
     <div class="mainbar">
-      <h1><a href="/" class="nolinkstyle">PolarBear</a></h1>
+      <h1><a href="/" class="nolinkstyle" style = 'padding-left: 10pt'>PolarBear</a></h1>
       {% if user and user.is_authenticated %}
       <div class="baroption">
         <p style = 'padding-right: 10pt'>welcome, {{ user.username }}</p>
+        <a href="#" class="buttonlink">Friends</a>
+        <a href="#" class="buttonlink">Profile</a>
         <a href="{% url 'logout' %}" class="buttonlink">log out</a>
       </div>
       {% elif 'signup' in request.get_full_path %}
