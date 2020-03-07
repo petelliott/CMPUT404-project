@@ -75,3 +75,29 @@ class PostsTestCase(TestCase):
         self.assertEqual("http://testserver/api/posts?page=0&size=2",
                          j["previous"])
         self.assertEqual(1, len(j["posts"]))
+
+
+class ViewAuthorTestCase(TestCase):
+    def setUp(self):
+        self.c = Client()
+        self.author_A = Author.signup("author_A", "pw", "pw")
+        self.author_B = Author.signup("author_B", "pw", "pw")
+        self.author_C = Author.signup("author_C", "pw", "pw")
+
+        self.author_A.follow(self.author_B)
+        self.author_B.follow(self.author_A)
+        self.author_A.follow(self.author_C)
+        self.author_C.follow(self.author_A)
+
+    def test_author(self):
+        j = self.c.get("/api/author/{}".format(self.author_A.pk)).json()
+
+        self.assertEqual(
+            "http://testserver/api/author/{}".format(self.author_A.pk),
+            j["id"])
+        self.assertEqual("http://testserver/api/", j["host"])
+        self.assertEqual(self.author_A.user.username, j["displayName"])
+        self.assertEqual(
+            "http://testserver/api/author/{}".format(self.author_A.pk),
+            j["url"])
+        self.assertEqual(2, len(j["friends"]))
