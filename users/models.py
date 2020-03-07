@@ -36,8 +36,10 @@ class Author(models.Model):
             return ()
 
         return filter(lambda p: p.listable_to(self.user),
-                      reduce(lambda a, b: a.union(b),
-                             (a.posts.all() for a in fs)))
+                      reduce(
+                          lambda a, b: a.union(b),
+                          (a.posts.all() for a in fs)
+                      ).order_by('-pk'))
 
     @classmethod
     def from_user(cls, user):
