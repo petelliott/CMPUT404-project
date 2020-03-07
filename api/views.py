@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 from blog.util import paginate
 from blog.models import Privacy
+from users.models import Author
 import blog
 
 def auth_api(func):
@@ -23,6 +24,18 @@ DEFAULT_PAGE_SIZE = 25
 def api_reverse(request, path, **kwargs):
     return request.build_absolute_uri(reverse(path, kwargs=kwargs))
 
+
+def serialize_author(request, author):
+    return {
+        "id": api_reverse(request, "api_author",
+                          author_id=author.pk),
+        "host": api_reverse(request, "api_root"),
+        "displayName": author.user.username,
+        "url": api_reverse(request, "api_author",
+                           author_id=author.pk),
+        "github": None #TODO
+    }
+
 def serialize_post(request, post):
     visibility_table = {
         Privacy.PRIVATE: "PRIVATE",
@@ -38,15 +51,7 @@ def serialize_post(request, post):
         "description": None, #TODO
         "contentType": post.content_type,
         "content": post.content, #TODO: images
-        "author": {
-            "id": api_reverse(request, "api_author",
-                              author_id=post.author.pk),
-            "host": api_reverse(request, "api_root"),
-            "displayName": post.author.user.username,
-            "url": api_reverse(request, "api_author",
-                               author_id=post.author.pk),
-            "github": None #TODO
-        },
+        "author": serialize_author(request, post.author),
         #TODO: comments
         "published": post.date,
         "id": post.pk,
@@ -108,4 +113,9 @@ def friendrequest(request):
 
 
 def author(request, author_id):
-    pass
+    author = get_object_or_404(Author, pk=author_id)
+    return JsonResponse({
+        **serialize_author(request, author),
+        "friends": [serialize_author(request, f)
+                    for f in author.get_friends()]
+    })
