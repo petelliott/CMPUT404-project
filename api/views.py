@@ -63,7 +63,6 @@ def posts(request):
 
     public = blog.models.Post.public()
     total = public.count()
-    print(request.path)
 
     def pageurl(n):
         return "{}?page={}&size={}".format(
