@@ -116,8 +116,7 @@ def viewpost(request, post_id):
 
 def allposts(request):
     return render(request, "blog/postlist.html",
-                  {"posts": models.Post.objects.filter(
-                      privacy=Privacy.PUBLIC).order_by("-pk"),
+                  {"posts": models.Post.public(),
                    "title": "Public Posts"})
 
 def friends(request):
