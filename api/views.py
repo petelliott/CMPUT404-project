@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.urls import reverse
 from blog.util import paginate
+from blog.models import Privacy
 import blog
 
 def auth_api(func):
@@ -23,6 +24,13 @@ def api_reverse(request, path, **kwargs):
     return request.build_absolute_uri(reverse(path, kwargs=kwargs))
 
 def serialize_post(request, post):
+    visibility_table = {
+        Privacy.PRIVATE: "PRIVATE",
+        Privacy.URL_ONLY: "PUBLIC",
+        Privacy.FRIENDS: "FRIENDS",
+        Privacy.FOAF: "FOAF",
+        Privacy.PUBLIC: "PUBLIC",
+    }
     return {
         "title": post.title,
         "source": api_reverse(request, "api_post", post_id=post.pk),
@@ -40,6 +48,11 @@ def serialize_post(request, post):
             "github": None #TODO
         },
         #TODO: comments
+        "published": post.date,
+        "id": post.pk,
+        "visibility": visibility_table[post.privacy],
+        "visibleTo": None,
+        "unlisted": post.privacy == Privacy.URL_ONLY
     }
 
 
