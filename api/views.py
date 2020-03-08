@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 from blog.util import paginate
-from blog.models import Privacy
+from blog.models import Privacy, Post
 from users.models import Author
 import blog
 
@@ -95,7 +95,8 @@ def authorid_posts(request, author_id):
 
 @auth_api
 def post(request, post_id):
-    pass
+    post = get_object_or_404(Post, pk=post_id)
+    return JsonResponse(serialize_post(request, post))
 
 
 @auth_api
