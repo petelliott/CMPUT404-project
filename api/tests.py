@@ -102,6 +102,7 @@ class ViewAuthorTestCase(TestCase):
             j["url"])
         self.assertEqual(2, len(j["friends"]))
 
+
 class PostTestCase(TestCase):
     def setUp(self):
         self.c = Client()
@@ -135,3 +136,34 @@ class PostTestCase(TestCase):
         self.assertEqual(exp.pk, act["id"])
         self.assertEqual("PUBLIC", act["visibility"])
         self.assertEqual(False, act["unlisted"])
+
+
+class AuthorFriendsTestCase(TestCase):
+    def setUp(self):
+        self.c = Client()
+        self.author_A = Author.signup("author_A", "pw", "pw")
+        self.author_B = Author.signup("author_B", "pw", "pw")
+        self.author_C = Author.signup("author_C", "pw", "pw")
+
+        self.author_A.follow(self.author_B)
+        self.author_B.follow(self.author_A)
+        self.author_A.follow(self.author_C)
+        self.author_C.follow(self.author_A)
+
+    def test_A_friends(self):
+        j = self.c.get("/api/author/{}/friends".format(self.author_A.pk)).json()
+
+        self.assertEqual("friends", j["query"])
+        self.assertEqual(2, len(j["authors"]))
+        self.assertTrue("http://testserver/api/author/{}".format(self.author_B.pk)
+                        in j["authors"])
+        self.assertTrue("http://testserver/api/author/{}".format(self.author_C.pk)
+                        in j["authors"])
+
+    def test_B_friends(self):
+        j = self.c.get("/api/author/{}/friends".format(self.author_B.pk)).json()
+
+        self.assertEqual("friends", j["query"])
+        self.assertEqual(1, len(j["authors"]))
+        self.assertTrue("http://testserver/api/author/{}".format(self.author_A.pk)
+                        in j["authors"])
