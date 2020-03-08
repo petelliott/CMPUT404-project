@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 from blog.util import paginate
-from blog.models import Privacy
+from blog.models import Privacy, Post
 from users.models import Author
 import blog
 
 def auth_api(func):
-    def inner(request):
+    def inner(request, *args, **kwargs):
         #TODO: authenticate with HTTP basic auth
-        return func(request)
+        return func(request, *args, **kwargs)
 
     return inner
 
@@ -88,30 +88,50 @@ def posts(request):
     })
 
 
+@auth_api
 def authorid_posts(request, author_id):
     pass
 
 
+@auth_api
 def post(request, post_id):
-    pass
+    post = get_object_or_404(Post, pk=post_id)
+    return JsonResponse(serialize_post(request, post))
 
 
+@auth_api
 def post_comments(request, post_id):
     pass
 
 
+@auth_api
 def author_friends(request, author_id):
-    pass
+    author = get_object_or_404(Author, pk=author_id)
+    if request.method == "POST":
+        #TODO will be added in part 2
+        pass
+    else:
+        return JsonResponse({
+            "query": "friends",
+            "authors": [
+                api_reverse(request, "api_author",
+                            author_id=a.pk)
+                for a in author.get_friends()
+            ],
+        })
 
 
+@auth_api
 def author_friendswith(request, author_id, author_id2):
     pass
 
 
+@auth_api
 def friendrequest(request):
     pass
 
 
+@auth_api
 def author(request, author_id):
     author = get_object_or_404(Author, pk=author_id)
     return JsonResponse({
