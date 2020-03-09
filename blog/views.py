@@ -10,6 +10,8 @@ from blog.models import Privacy, Post
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 import commonmark
+import polarbear.settings 
+
 
 class PostForm(forms.Form):
     title = forms.CharField()
@@ -134,6 +136,7 @@ def viewpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
+    print
 
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
