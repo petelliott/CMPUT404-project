@@ -10,22 +10,25 @@
 </form>
 
 <script>
-	// This purpose of this function is 
-	// to hide image field when we choose to use Markdown
-	// and display image field when we use plain text
+	// This purpose of this function is to
+	// hide image field and display content field when we choose to use markdown/plaintext
+	// and hide content and display image field when we use image
 
 	function autohide(){
 		console.log(document.getElementById('id_content_type').selectedIndex)
-		if (document.getElementById('id_content_type').selectedIndex){
-			// This is Image Field (maybe a stupid way to locate it)
-			// hide it
+
+		if (document.getElementById('id_content_type').selectedIndex==0 || document.getElementById('id_content_type').selectedIndex==1){
+			//hide image field and display content field 
+			document.getElementsByTagName('p')[4].style.display='';
 			document.getElementsByTagName('p')[5].style.display='none';
 		} else {
-			// display it
+			// hide content and display image field
+			document.getElementsByTagName('p')[4].style.display='none';
 			document.getElementsByTagName('p')[5].style.display='';
 		}
 	}
 	console.log(document.getElementById('id_content_type').selectedIndex)
+	autohide()
 	document.getElementById('id_content_type').onchange = autohide;
 </script>
 

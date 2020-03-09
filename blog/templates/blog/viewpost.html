@@ -12,13 +12,17 @@
 
 {% if post.content_type == "text/plain" %}
 <p>{{ content }}</p>
-	{% if post.image %}
-		<img src = "{{ image }}" alt ="haha" >
-	{% endif %}
 {% elif post.content_type == "text/markdown" %}
 {% autoescape off %}
 {{ content }}
 {% endautoescape %}
 {% endif %}
+
+{% if post.content_type == "multipart/form-data" %}
+	{% if post.image %}
+		<img src = "{{ image }}" alt ="haha" >
+	{% endif %}
+{% endif %}
+
 
 {% endblock %}

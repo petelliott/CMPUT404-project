@@ -13,7 +13,7 @@ import commonmark
 
 class PostForm(forms.Form):
     title = forms.CharField()
-    content = forms.CharField(widget=forms.Textarea)
+    
     privacy = forms.IntegerField(widget=forms.Select(choices=(
         (Privacy.PUBLIC, "Public"),
         (Privacy.PRIVATE, "Private"),
@@ -25,7 +25,9 @@ class PostForm(forms.Form):
     content_type = forms.CharField(widget=forms.Select(choices=(
         ("text/plain", "Plain Text"),
         ("text/markdown", "Markdown"),
+        ("multipart/form-data", "Image"),
     )))
+    content = forms.CharField(widget=forms.Textarea, required=False)
     image = forms.ImageField(label = 'Choose an Image', required=False)
 
 
@@ -123,14 +125,14 @@ def viewpost(request, post_id):
     post = get_object_or_404(models.Post, pk=post_id)
     if not post.viewable_by(request.user):
         raise PermissionDenied
-
+    content = ''
     author = users.models.Author.from_user(request.user)
     if post.content_type == "text/markdown":
         content = commonmark.commonmark(post.content)
-    else:
+    elif post.content_type == "text/plain":
         content = post.content
+    else:
         if post.image != None:
-
             image = post.image.__str__()
 
     return render(request, "blog/viewpost.html",
