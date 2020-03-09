@@ -21,12 +21,21 @@ class PostForm(forms.Form):
         (Privacy.FRIENDS, "Friends only"),
         (Privacy.FOAF, "Friends of friends"),
     )))
-    image = forms.ImageField(label = 'Choose an Image')
+
     content_type = forms.CharField(widget=forms.Select(choices=(
         ("text/plain", "Plain Text"),
         ("text/markdown", "Markdown"),
     )))
+    image = forms.ImageField(label = 'Choose an Image', required=False)
 
+
+    def __str__(self):
+        post = ["Title: " + self.title,
+                "Content: "+self.content,
+                "privacy: "+self.privacy,
+                "Image: "+self.image,
+                "content_type"+self.content_type]
+        return '\n'.join(post)
 
 
 
@@ -37,16 +46,18 @@ def post(request):
 
     if request.method == "POST":
         form = PostForm(request.POST,request.FILES)
+        # print("p1")
 
         if form.is_valid():
             author = request.user.author
+            # print("p2")
 
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
             privacy = form.cleaned_data["privacy"]
             content_type = form.cleaned_data["content_type"]
-            image = form['image']
-            form.save()
+            image = form.cleaned_data['image']
+
             post = models.Post.objects.create(date=datetime.date.today(),
                                               title=title,
                                               content=content,
@@ -54,7 +65,8 @@ def post(request):
                                               content_type=content_type,
                                               image = image,
                                               privacy=privacy)
-
+            print(image)
+            post.save()
 
 
             return redirect("viewpost", post_id=post.pk)
@@ -117,10 +129,14 @@ def viewpost(request, post_id):
         content = commonmark.commonmark(post.content)
     else:
         content = post.content
+        if post.image != None:
+
+            image = post.image.__str__()
 
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
-                   "content": content})
+                   "content": content,
+                   "image":  '../../../media/' + image}) # temporally hardcoding the path
 
 def allposts(request):
     return render(request, "blog/postlist.html",

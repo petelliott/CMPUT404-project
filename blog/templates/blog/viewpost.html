@@ -12,6 +12,9 @@
 
 {% if post.content_type == "text/plain" %}
 <p>{{ content }}</p>
+	{% if post.image %}
+		<img src = "{{ image }}" alt ="haha" >
+	{% endif %}
 {% elif post.content_type == "text/markdown" %}
 {% autoescape off %}
 {{ content }}

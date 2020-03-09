@@ -2,9 +2,31 @@
 {% block title %}PolarBear -- Postpage{% endblock %}
 {% block content %}
 
-<form action="{% url 'post' %}" method="post">
+
+<form action="{% url 'post' %}" method="post" enctype="multipart/form-data" >
   {% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Post!">
 </form>
+
+<script>
+	// This purpose of this function is 
+	// to hide image field when we choose to use Markdown
+	// and display image field when we use plain text
+
+	function autohide(){
+		console.log(document.getElementById('id_content_type').selectedIndex)
+		if (document.getElementById('id_content_type').selectedIndex){
+			// This is Image Field (maybe a stupid way to locate it)
+			// hide it
+			document.getElementsByTagName('p')[5].style.display='none';
+		} else {
+			// display it
+			document.getElementsByTagName('p')[5].style.display='';
+		}
+	}
+	console.log(document.getElementById('id_content_type').selectedIndex)
+	document.getElementById('id_content_type').onchange = autohide;
+</script>
+
 {% endblock %}
