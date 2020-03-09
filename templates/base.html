@@ -13,15 +13,15 @@
       {% if user and user.is_authenticated %}
       <div class="baroption">
         <p>welcome, {{ user.username }}</p>
-        <a href="/user/authors/{{ user.author.pk }}" class="buttonlink">Profile</a>
+        <a href="{% url 'profile' user.author.pk %}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
-        <a href="/blog/posts/friends" class="buttonlink">Friends</a>
-        <a href="{% url 'logout' %}" class="buttonlink">log out</a>
+        <a href="{% url 'friendposts' %}" class="buttonlink">Friends</a>
+        <a href="{% url 'logout' %}" class="buttonlink">Log Out</a>
       </div>
       {% elif 'signup' in request.get_full_path %}
-      <a href="{% url 'login' %}" class="buttonlink baroption">log in</a>
+      <a href="{% url 'login' %}" class="buttonlink baroption">Log In</a>
       {% else %}
-      <a href="{% url 'signup' %}" class="buttonlink baroption">Sign up</a>
+      <a href="{% url 'signup' %}" class="buttonlink baroption">Sign Up</a>
       {% endif %}
     </div>
     {% block content %}
