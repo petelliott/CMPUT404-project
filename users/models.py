@@ -30,6 +30,9 @@ class Author(models.Model):
     def get_friends(self):
         return self.friends.all().intersection(self.followers.all())
 
+    def get_friend_requests(self):
+        return self.followers.all().difference(self.friends.all())
+
     def friends_posts(self):
         fs = self.get_friends()
         if not fs.exists():

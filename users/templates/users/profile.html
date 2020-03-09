@@ -4,16 +4,29 @@
 
 <h2>{{ author.user.username }}</h2>
 
+{% if author and author.user == user %}
+<p>Friend Requests:</p>
+{% for freq in freqs %}
+<form action="{% url 'profile' freq.pk %}" method="post">
+  {% csrf_token %}
+  <label>{{ freq.user.username }}</label>
+  <button name="action" type="submit" value="accept-request">Accept</button>
+  <button name="action" type="submit" value="reject-request">Reject</button>
+</form>
+<br>
+{% endfor %}
+{% else %}
 <form action="{% url 'profile' author.pk %}" method="post">
   {% csrf_token %}
   {% if not user.is_authenticated %}
-  <input type="submit" value="follow" disabled>
+  <input name="action" type="submit" value="follow" disabled>
   {% elif follows %}
-  <input type="submit" value="un-follow">
+  <input name="action" type="submit" value="un-follow">
   {% else %}
-  <input type="submit" value="follow">
+  <input name="action" type="submit" value="follow">
   {% endif %}
 </form>
+{% endif %}
 <!-- TODO: maybe put the users posts here -->
 
 {% endblock %}
