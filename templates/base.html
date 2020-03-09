@@ -15,6 +15,7 @@
         <p>welcome, {{ user.username }}</p>
         <a href="{% url 'profile' user.author.pk %}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
+        <a href="{% url 'post' %}" class="buttonlink">Post</a>
         <a href="{% url 'friendposts' %}" class="buttonlink">Friends</a>
         <a href="{% url 'logout' %}" class="buttonlink">Log Out</a>
       </div>
