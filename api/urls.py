@@ -1,8 +1,11 @@
 from django.urls import path
+from django.views.defaults import page_not_found
 from . import views
 
 
 urlpatterns = [
+    # this view exists to name the root of the api
+    path('', page_not_found, name="api_root"),
     path('author/posts', views.author_posts, name="api_authorposts"),
     path('posts', views.posts, name="api_posts"),
     path('author/<int:author_id>/posts', views.authorid_posts,

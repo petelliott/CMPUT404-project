@@ -137,3 +137,7 @@ a.nolinkstyle {
     text-decoration: none;
     color: white;
 }
+
+friend-request {
+    display: inline;
+}

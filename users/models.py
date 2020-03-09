@@ -30,14 +30,19 @@ class Author(models.Model):
     def get_friends(self):
         return self.friends.all().intersection(self.followers.all())
 
+    def get_friend_requests(self):
+        return self.followers.all().difference(self.friends.all())
+
     def friends_posts(self):
         fs = self.get_friends()
         if not fs.exists():
             return ()
 
         return filter(lambda p: p.listable_to(self.user),
-                      reduce(lambda a, b: a.union(b),
-                             (a.posts.all() for a in fs)))
+                      reduce(
+                          lambda a, b: a.union(b),
+                          (a.posts.all() for a in fs)
+                      ).order_by('-pk'))
 
     @classmethod
     def from_user(cls, user):
