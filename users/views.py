@@ -98,13 +98,21 @@ def profile(request, author_id):
         return render(request, "users/profile.html", {"author": author})
 
     if request.method == "POST":
-        if you.follows(author):
-            you.unfollow(author)
-        else:
+        if request.POST["action"] == "follow":
             you.follow(author)
+        elif request.POST["action"] == "un-follow":
+            you.unfollow(author)
+        elif request.POST["action"] == "accept-request":
+            you.follow(author)
+            return redirect('profile', you.pk)
+        elif request.POST["action"] == "reject-request":
+            author.unfollow(you)
+            return redirect('profile', you.pk)
 
         return redirect('profile', author_id)
     else:
+        print(you.get_friend_requests())
         return render(request, "users/profile.html",
                       {"author": author,
-                       "follows": you.follows(author)})
+                       "follows": you.follows(author),
+                       "freqs": you.get_friend_requests()})

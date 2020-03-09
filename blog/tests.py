@@ -1,6 +1,8 @@
 from django.test import TestCase
 from .models import Post, Privacy
 from users.models import Author
+from .util import paginate
+import itertools
 import datetime
 
 # Create your tests here.
@@ -78,3 +80,36 @@ class PrivacyTestCase(TestCase):
         self.assertTrue(post.listable_to(self.author_A.user))
         self.assertTrue(post.listable_to(self.author_B.user))
         self.assertTrue(post.listable_to(self.author_C.user))
+
+class PaginateTestCase(TestCase):
+    def test_None(self):
+        l = [4,5,3,2,1,55,6,7,8,9]
+        self.assertEqual(l, list(paginate(l)))
+
+    def test_0(self):
+        try:
+            paginate(itertools.count(), 0, 0)
+            self.fail()
+        except AssertionError:
+            pass
+
+    def test_1(self):
+        self.assertEqual((0,), tuple(paginate(itertools.count(), 0, 1)))
+        self.assertEqual((1,), tuple(paginate(itertools.count(), 1, 1)))
+        self.assertEqual((2,), tuple(paginate(itertools.count(), 2, 1)))
+
+    def test_2(self):
+        self.assertEqual((0,1), tuple(paginate(itertools.count(), 0, 2)))
+        self.assertEqual((2,3), tuple(paginate(itertools.count(), 1, 2)))
+        self.assertEqual((4,5), tuple(paginate(itertools.count(), 2, 2)))
+
+    def test_3(self):
+        self.assertEqual((0,1,2), tuple(paginate(itertools.count(), 0, 3)))
+        self.assertEqual((3,4,5), tuple(paginate(itertools.count(), 1, 3)))
+        self.assertEqual((6,7,8), tuple(paginate(itertools.count(), 2, 3)))
+
+    def test_end(self):
+        l = [0, 1, 2, 3, 4]
+        self.assertEqual((3,4), tuple(paginate(l, 1, 3)))
+        self.assertEqual((), tuple(paginate(l, 2, 3)))
+        self.assertEqual((), tuple(paginate(l, 3, 3)))
