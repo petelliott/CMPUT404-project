@@ -77,5 +77,7 @@ class Author(models.Model):
 
         user = User.objects.create_user(username=username,
                                         password=password1)
+        user.is_active = False
+        user.save()
 
         return cls.objects.create(number=60, user=user)

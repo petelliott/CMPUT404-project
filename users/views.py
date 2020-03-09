@@ -6,7 +6,10 @@ from django.contrib import auth
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib import messages
 
+def toast(request):
+    messages.success(request,"Sign up successully but please wait for approve")
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -30,7 +33,8 @@ def signup(request):
 
             try:
                 author = models.Author.signup(username, password, password2)
-                auth.login(request, author.user)
+
+                #auth.login(request, author.user)
                 return redirect("root")
             except models.Author.UserNameTaken:
                 return render(request, "users/create.html",
@@ -40,6 +44,8 @@ def signup(request):
                               {"form": form, "nomatch": True})
     else:
         form = SignupForm()
+    
+
 
     return render(request, "users/create.html", {"form": form})
 
