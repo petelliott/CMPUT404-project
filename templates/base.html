@@ -5,19 +5,24 @@
   <head>
     <title>{% block title %}PolarBear{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    {% block stylesheets %}{% endblock %}
   </head>
   <body>
     <div class="mainbar">
       <h1><a href="/" class="nolinkstyle">PolarBear</a></h1>
       {% if user and user.is_authenticated %}
       <div class="baroption">
-        <p style = 'padding-right: 10pt'>welcome, {{ user.username }}</p>
-        <a href="{% url 'logout' %}" class="buttonlink">log out</a>
+        <p>welcome, {{ user.username }}</p>
+        <a href="{% url 'profile' user.author.pk %}" class="buttonlink">Profile</a>
+        <a href="/" class="buttonlink">Home</a>
+        <a href="{% url 'post' %}" class="buttonlink">Post</a>
+        <a href="{% url 'friendposts' %}" class="buttonlink">Friends</a>
+        <a href="{% url 'logout' %}" class="buttonlink">Log Out</a>
       </div>
       {% elif 'signup' in request.get_full_path %}
-      <a href="{% url 'login' %}" class="buttonlink baroption">log in</a>
+      <a href="{% url 'login' %}" class="buttonlink baroption">Log In</a>
       {% else %}
-      <a href="{% url 'signup' %}" class="buttonlink baroption">Sign up</a>
+      <a href="{% url 'signup' %}" class="buttonlink baroption">Sign Up</a>
       {% endif %}
     </div>
     {% block content %}
