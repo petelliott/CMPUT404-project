@@ -12,7 +12,7 @@
       {% if user and user.is_authenticated %}
       <div class="baroption">
         <p style = 'padding-right: 10pt'>welcome, {{ user.username }}</p>
-        <a href="/user/authors/{{ user.id }}" class="buttonlink">Profile</a>
+        <a href="/user/authors/{{ user.author.id }}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
         <a href="#" class="buttonlink">Friends</a>
         <a href="{% url 'logout' %}" class="buttonlink">log out</a>
