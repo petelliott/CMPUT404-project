@@ -5,16 +5,17 @@
   <head>
     <title>{% block title %}PolarBear{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    {% block stylesheets %}{% endblock %}
   </head>
   <body>
     <div class="mainbar">
-      <h1><a href="/" class="nolinkstyle" style = 'padding-left: 10pt'>PolarBear</a></h1>
+      <h1><a href="/" class="nolinkstyle">PolarBear</a></h1>
       {% if user and user.is_authenticated %}
       <div class="baroption">
-        <p style = 'padding-right: 10pt'>welcome, {{ user.username }}</p>
-        <a href="/user/authors/{{ user.author.id }}" class="buttonlink">Profile</a>
+        <p>welcome, {{ user.username }}</p>
+        <a href="/user/authors/{{ user.author.pk }}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
-        <a href="#" class="buttonlink">Friends</a>
+        <a href="/blog/posts/friends" class="buttonlink">Friends</a>
         <a href="{% url 'logout' %}" class="buttonlink">log out</a>
       </div>
       {% elif 'signup' in request.get_full_path %}
