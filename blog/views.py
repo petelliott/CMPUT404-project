@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 import commonmark
 import polarbear.settings 
+import magic
 
 
 class PostForm(forms.Form):
@@ -27,7 +28,7 @@ class PostForm(forms.Form):
     content_type = forms.CharField(widget=forms.Select(choices=(
         ("text/plain", "Plain Text"),
         ("text/markdown", "Markdown"),
-        ("multipart/form-data", "Image"),
+        ("undefined_type_image", "Image"),
     )))
     content = forms.CharField(widget=forms.Textarea, required=False)
     image = forms.ImageField(label = 'Choose an Image', required=False)
@@ -136,12 +137,17 @@ def viewpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-    print
+            image_path = '../../../media/' + image # temporally hardcoding the path
+            mime = magic.Magic(mime=True)
+            post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
+
+    # print(mime.from_file(polarbear.settings.MEDIA_ROOT+image))
+    # print(polarbear.settings.MEDIA_ROOT)
 
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
                    "content": content,
-                   "image":  '../../../media/' + image}) # temporally hardcoding the path
+                   "image":  image_path}) 
 
 def allposts(request):
     return render(request, "blog/postlist.html",
