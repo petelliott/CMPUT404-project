@@ -18,6 +18,7 @@
       </form>
       <br>
     {% endfor %}
+    <button type="button" class="follow button">Edit Profile</button>
   {% else %}
     <form action="{% url 'profile' author.pk %}" method="post">
       {% csrf_token %}

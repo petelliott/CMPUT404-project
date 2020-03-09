@@ -1,11 +1,11 @@
-
 .profile-header{
     margin-left:20%; 
     margin-right:20%; 
     border-style: solid;
     border-color: lightgray;
     border-width: 1px;
-    
+    padding: 10px 20px;
+    overflow: auto;
 }
 
 .profile-body{
@@ -14,6 +14,8 @@
     border-style: solid;
     border-color: lightgray;
     border-width: 1px;
+    padding: 10px 20px;
+    overflow: auto;
 }
 
 .button{
