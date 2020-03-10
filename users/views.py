@@ -116,7 +116,7 @@ def profile(request, author_id):
                       {"author": author,
                        "follows": you.follows(author),
                        "freqs": you.get_friend_requests(),
-                       "posts": author.authors_posts(you)})
+                       "posts": author.authors_posts(request.user)})
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)

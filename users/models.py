@@ -56,10 +56,10 @@ class Author(models.Model):
         If the user is view thier own profile, all posts are returned regardless of permissions
         If viewing another author's profile, only public posts are returned
         """
-        if (self.pk == user.pk):
+        if (self.user == user):
             return self.posts.all()
         else:
-            return filter( lambda p: p.listable_to(user.user), self.posts.all())
+            return filter( lambda p: p.listable_to(user), self.posts.all())
 
     @classmethod
     def from_user(cls, user):
