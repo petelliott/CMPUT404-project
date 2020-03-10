@@ -4,14 +4,34 @@ from django.urls import reverse
 from blog.util import paginate
 from blog.models import Privacy, Post
 from users.models import Author
+from django.contrib import auth
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import blog
 import json
+import base64
+
+
+def http_basic_authenticate(request):
+    if 'Authorization' not in request.headers:
+        return None
+
+    hval = request.headers['Authorization']
+    if not hval.startswith("Basic "):
+        return None
+
+    username, password = base64.b64decode(hval[len("Basic "):].encode("ascii"))\
+                               .decode("utf-8").split(":")
+    return auth.authenticate(request, username=username,
+                             password=password)
 
 def auth_api(func):
     def inner(request, *args, **kwargs):
         #TODO: authenticate with HTTP basic auth
+        user = http_basic_authenticate(request)
+        if user is not None:
+            auth.login(request, user)
+
         return func(request, *args, **kwargs)
 
     return inner
@@ -20,7 +40,7 @@ def auth_api(func):
 def author_posts(request):
     #TODO: maybe authors can use the api?
     #      until then it's the same as posts
-    return posts()
+    return posts(request)
 
 DEFAULT_PAGE_SIZE = 25
 
