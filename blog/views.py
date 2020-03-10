@@ -71,6 +71,10 @@ def post(request):
                                               image = image,
                                               privacy=privacy)
             print(image)
+            if post.image != None:
+                image = post.image.__str__()
+                mime  = magic.Magic(mime=True)
+                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
             post.save()
 
 
@@ -141,8 +145,7 @@ def viewpost(request, post_id):
             image = post.image.__str__()
             image_path = '../../../media/'+image  # temporally hardcoding the path
             print(image_path)
-            mime = magic.Magic(mime=True)
-            post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
+
 
     # print(mime.from_file(polarbear.settings.MEDIA_ROOT+image))
     # print(polarbear.settings.MEDIA_ROOT)
