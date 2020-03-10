@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from blog.util import paginate
 from blog.models import Privacy, Post
 from users.models import Author
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 import blog
+import json
 
 def auth_api(func):
     def inner(request, *args, **kwargs):
@@ -151,9 +154,32 @@ def author_friendswith(request, author_id, author_id2):
     pass
 
 
+def request_host(request):
+    return request.build_absolute_uri(reverse("api_root"))
+
+def author_from_url(host, id):
+    if id.startswith(host):
+        author_id = int(id.split('/')[-1])
+        return get_object_or_404(Author, pk=author_id)
+    else:
+        #TODO add remoteAuthors for part 2
+        assert False
+
+
+@csrf_exempt
 @auth_api
+@require_POST
 def friendrequest(request):
-    pass
+    data = json.loads(request.body)
+    host = request_host(request)
+    try:
+        author = author_from_url(host, data["author"]["id"])
+        friend = author_from_url(host, data["friend"]["id"])
+    except KeyError:
+        return JsonResponse({}, status=400)
+
+    author.follow(friend)
+    return HttpResponse(status=204)
 
 
 @auth_api
