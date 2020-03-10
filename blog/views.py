@@ -28,7 +28,7 @@ class PostForm(forms.Form):
     content_type = forms.CharField(widget=forms.Select(choices=(
         ("text/plain", "Plain Text"),
         ("text/markdown", "Markdown"),
-        ("undefined_type_image", "Image"),
+        ("undefined_image_type", "Image"),
     )))
     content = forms.CharField(widget=forms.Textarea, required=False)
     image = forms.ImageField(label = 'Choose an Image', required=False)
