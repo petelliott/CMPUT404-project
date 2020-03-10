@@ -33,6 +33,12 @@ class Author(models.Model):
     def get_friend_requests(self):
         return self.followers.all().difference(self.friends.all())
 
+    def get_followers(self):
+        return self.followers.all()
+    
+    def get_following(self):
+        return self.friends.all()
+
     def friends_posts(self):
         fs = self.get_friends()
         if not fs.exists():
@@ -43,6 +49,17 @@ class Author(models.Model):
                           lambda a, b: a.union(b),
                           (a.posts.all() for a in fs)
                       ).order_by('-pk'))
+
+    def authors_posts(self, user):
+        """
+        Returns all of an author's posts
+        If the user is view thier own profile, all posts are returned regardless of permissions
+        If viewing another author's profile, only public posts are returned
+        """
+        if (self.user == user):
+            return self.posts.all()
+        else:
+            return filter( lambda p: p.listable_to(user), self.posts.all())
 
     @classmethod
     def from_user(cls, user):

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}PolarBear -- Friends of {{ author.user.username}} {% endblock %}
+{% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/friends.css'%}">{% endblock %}
+{% block content %}
+
+<div class="friends-body">
+    <div class="followers">
+        <h1>Followers</h1>
+        <ul>
+        {% for f in followers %}
+            <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+
+    <div class="following">
+        <h1>Following</h1>
+        <ul>
+        {% for f in following %}
+            <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

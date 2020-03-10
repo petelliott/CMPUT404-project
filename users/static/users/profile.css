@@ -1,0 +1,60 @@
+.profile-header{
+    margin-left:20%; 
+    margin-right:20%; 
+    border-style: solid;
+    border-color: lightgray;
+    border-width: 1px;
+    padding: 10px 20px;
+    overflow: auto;
+}
+
+.profile-body{
+    margin-left:20%; 
+    margin-right:20%; 
+    border-style: solid;
+    border-color: lightgray;
+    border-width: 1px;
+    padding: 10px 20px;
+    overflow: auto;
+}
+
+.button{
+    padding: 10px 20px;
+    text-align: center;
+    font-weight: bold;
+    border-width: 1px;
+    border-radius: 16px;
+
+}
+.follow{
+    color: #2e7acd;
+    background-color: white;
+    border: none;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #2e7acd;
+    display: block;
+    float: right;
+}
+
+.follow:hover{
+    background-color: #2e7bcd2d;
+}
+
+.unfollow{
+    padding: 10px 20px;
+    color: white;
+    background-color: #2e7acd;
+    text-align: center;
+    font-weight: bold;
+    border-style: solid;
+    border-color: #2e7acd;
+    display: block;
+    float: right;
+}
+
+.unfollow:hover{
+    background-color: #e00c29de;
+    border-color: #e00c29de;
+}
+
