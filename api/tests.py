@@ -167,3 +167,36 @@ class AuthorFriendsTestCase(TestCase):
         self.assertEqual(1, len(j["authors"]))
         self.assertTrue("http://testserver/api/author/{}".format(self.author_A.pk)
                         in j["authors"])
+
+
+class AuthorPostsTestCase(TestCase):
+    def setUp(self):
+        self.c = Client()
+        self.author_A = Author.signup("author_A", "pw", "pw")
+        self.author_B = Author.signup("author_B", "pw", "pw")
+
+        self.posts = [
+            Post.objects.create(date=datetime.date.today(),
+                                title="a",
+                                content="a",
+                                author=self.author_A,
+                                privacy=Privacy.PUBLIC),
+            Post.objects.create(date=datetime.date.today(),
+                                title="b",
+                                content="b",
+                                author=self.author_A,
+                                privacy=Privacy.PUBLIC),
+            Post.objects.create(date=datetime.date.today(),
+                                title="c",
+                                content="c",
+                                author=self.author_B,
+                                privacy=Privacy.PUBLIC)
+        ]
+
+    def test_author_posts(self):
+        j = self.c.get("/api/author/{}/posts".format(self.author_A.pk)).json()
+
+        self.assertEqual(j["count"], 2)
+        self.assertEqual(len(j["posts"]), 2)
+        self.assertEqual(j["posts"][0]["author"]["displayName"], "author_A")
+        self.assertEqual(j["posts"][1]["author"]["displayName"], "author_A")
