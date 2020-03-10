@@ -115,7 +115,8 @@ def profile(request, author_id):
         return render(request, "users/profile.html",
                       {"author": author,
                        "follows": you.follows(author),
-                       "freqs": you.get_friend_requests()})
+                       "freqs": you.get_friend_requests(),
+                       "posts": author.authors_posts(you)})
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)

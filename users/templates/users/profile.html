@@ -33,8 +33,13 @@
 </div>
 <div class="profile-body">
   <ol>
-    <li>Post 1</li>
-    <li>Post 2</li>
+    {% for post in posts %}
+      <li>
+        <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
+        --
+        <a href="{% url 'profile' post.author.pk %}">{{ post.author.user.username }}</a>
+      </li>
+    {% endfor %}
   </ol>
 </div>
 <!-- TODO: maybe put the users posts here -->

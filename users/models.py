@@ -50,6 +50,17 @@ class Author(models.Model):
                           (a.posts.all() for a in fs)
                       ).order_by('-pk'))
 
+    def authors_posts(self, user):
+        """
+        Returns all of an author's posts
+        If the user is view thier own profile, all posts are returned regardless of permissions
+        If viewing another author's profile, only public posts are returned
+        """
+        if (self.pk == user.pk):
+            return self.posts.all()
+        else:
+            return filter( lambda p: p.listable_to(user.user), self.posts.all())
+
     @classmethod
     def from_user(cls, user):
         """
