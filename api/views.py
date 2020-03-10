@@ -177,9 +177,8 @@ def friendrequest(request):
         friend = author_from_url(host, data["friend"]["id"])
     except KeyError:
         return JsonResponse({}, status=400)
-
     author.follow(friend)
-    return HttpResponse(status=204)
+    return JsonResponse({})
 
 
 @auth_api
