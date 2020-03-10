@@ -3,32 +3,50 @@
 {% block content %}
 
 
-<form action="{% url 'post' %}" method="post" enctype="multipart/form-data" >
+<form action="{% url 'post' %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
   {% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Post!">
 </form>
 
 <script>
+	// If current content type is plain text/Markdown, content cannot be empty
+	// If current content type is image, image is required
+	function validateForm() {
+		if (document.getElementById('id_content_type').selectedIndex==0 || document.getElementById('id_content_type').selectedIndex==1){
+			var required_field = "content";
+			var x = document.forms[0][required_field].value;
+		}
+		else{
+			var required_field = "image";
+			var x = document.forms[0][required_field].value;
+		}
+		if (x == "") {
+			alert(required_field + " must be filled out");
+			return false;
+		}
+	}
 	// This purpose of this function is to
 	// hide image field and display content field when we choose to use markdown/plaintext
 	// and hide content and display image field when we use image
-
 	function autohide(){
 		console.log(document.getElementById('id_content_type').selectedIndex)
-
 		if (document.getElementById('id_content_type').selectedIndex==0 || document.getElementById('id_content_type').selectedIndex==1){
 			//hide image field and display content field 
 			document.getElementsByTagName('p')[4].style.display='';
 			document.getElementsByTagName('p')[5].style.display='none';
+			document.forms[0]['image'].value = ''
+
 		} else {
 			// hide content and display image field
 			document.getElementsByTagName('p')[4].style.display='none';
 			document.getElementsByTagName('p')[5].style.display='';
+			document.forms[0]['content'].value = ''
 		}
 	}
-	console.log(document.getElementById('id_content_type').selectedIndex)
-	autohide()
+
+	console.log(document.getElementById('id_content_type').selectedIndex);
+	autohide();
 	document.getElementById('id_content_type').onchange = autohide;
 </script>
 
