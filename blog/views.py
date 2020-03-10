@@ -71,6 +71,10 @@ def post(request):
                                               image = image,
                                               privacy=privacy)
             print(image)
+            if post.image != None:
+                image = post.image.__str__()
+                mime  = magic.Magic(mime=True)
+                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
             post.save()
 
 
@@ -129,7 +133,9 @@ def viewpost(request, post_id):
     if not post.viewable_by(request.user):
         raise PermissionDenied
     content = ''
+    image_path = ''
     author = users.models.Author.from_user(request.user)
+
     if post.content_type == "text/markdown":
         content = commonmark.commonmark(post.content)
     elif post.content_type == "text/plain":
@@ -137,9 +143,9 @@ def viewpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            image_path = '../../../media/' + image # temporally hardcoding the path
-            mime = magic.Magic(mime=True)
-            post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
+            image_path = '../../../media/'+image  # temporally hardcoding the path
+            print(image_path)
+
 
     # print(mime.from_file(polarbear.settings.MEDIA_ROOT+image))
     # print(polarbear.settings.MEDIA_ROOT)
