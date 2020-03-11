@@ -122,31 +122,12 @@ def posts(request):
 @auth_api
 def authorid_posts(request, author_id):
     author = get_object_or_404(Author, pk=author_id)
-
-    page = int(request.GET.get("page", 0))
-    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
-
-    # TODO: for future parts this will be augemented to check viewer
-    #       permissions. currently this behavior is not specified
-    public = author.posts.filter(privacy=Privacy.PUBLIC).order_by("-pk")
-    total = public.count()
-
-    def pageurl(n):
-        return "{}?page={}&size={}".format(
-            api_reverse(request, "api_authoridposts", author_id=author_id),
-            n, size)
-
-    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
-    prev = {"previous": pageurl(page-1) } if page > 0 else {}
-
-    posts = list(paginate(public, page, size))
-    return JsonResponse({
-        "count": total,
-        "size": size,
-        **nex,
-        **prev,
-        "posts": [serialize_post(request, p) for p in posts]
-    })
+    return render_posts(
+        request,
+        [p for p in author.posts.order_by("-pk")
+         if p.listable_to(request.user)],
+        api_reverse(request, "api_authoridposts", author_id=author_id),
+    )
 
 
 @auth_api
