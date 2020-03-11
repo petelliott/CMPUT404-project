@@ -15,6 +15,8 @@ urlpatterns = [
          name="api_post_comments"),
     path('author/<int:author_id>/friends', views.author_friends,
          name="api_authorfriends"),
+    path('friends/<int:author_id>', views.author_friends,
+         name="api_stupidalias"),
     #TODO: re type author ids, this will not work with other nodes
     path('author/<int:author_id>/friends/<int:author_id2>',
          views.author_friendswith,
