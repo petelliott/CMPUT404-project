@@ -252,6 +252,40 @@ class AuthorFriendsTestCase(TestCase):
         self.assertTrue("http://testserver/api/author/{}".format(self.author_A.pk)
                         in j["authors"])
 
+    def test_post_query(self):
+        j = self.c.post("/api/author/{}/friends".format(self.author_A.pk), {
+            "query": "friends",
+            "authors": []
+        }, content_type="application/json").json()
+
+        self.assertEqual(0, len(j["authors"]))
+
+        j = self.c.post("/api/author/{}/friends".format(self.author_A.pk), {
+            "query": "friends",
+            "authors": [
+                "http://testserver/api/author/{}".format(self.author_B.pk)
+            ]
+        }, content_type="application/json").json()
+
+        self.assertEqual(1, len(j["authors"]))
+        self.assertTrue("http://testserver/api/author/{}".format(self.author_B.pk)
+                        in j["authors"])
+
+        j = self.c.post("/api/author/{}/friends".format(self.author_A.pk), {
+            "query": "friends",
+            "authors": [
+                "http://testserver/api/author/{}".format(self.author_B.pk),
+                "http://testserver/api/author/{}".format(self.author_C.pk)
+            ]
+        }, content_type="application/json").json()
+
+        self.assertEqual(2, len(j["authors"]))
+        self.assertTrue("http://testserver/api/author/{}".format(self.author_B.pk)
+                        in j["authors"])
+        self.assertTrue("http://testserver/api/author/{}".format(self.author_C.pk)
+                        in j["authors"])
+
+
 
 class AuthorPostsTestCase(TestCase):
     def setUp(self):
