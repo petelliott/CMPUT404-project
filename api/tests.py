@@ -137,6 +137,37 @@ class PostTestCase(TestCase):
         self.assertEqual("PUBLIC", act["visibility"])
         self.assertEqual(False, act["unlisted"])
 
+    def test_update_post(self):
+        post = Post.objects.create(date=datetime.date.today(),
+                                   title="a",
+                                   content="a",
+                                   author=self.author,
+                                   privacy=Privacy.PUBLIC)
+
+        resp = self.c.put("/api/posts/{}".format(post.pk), {
+            "title": "test",
+        }, content_type="application/json")
+        self.assertEqual(200, resp.status_code)
+
+        post.refresh_from_db()
+
+        self.assertEqual("test", post.title)
+        self.assertEqual("a", post.content)
+
+        resp = self.c.put("/api/posts/{}".format(post.pk), {
+            "content": "test",
+            "contentType": "text/markdown",
+        }, content_type="application/json")
+        self.assertEqual(200, resp.status_code)
+
+        post.refresh_from_db()
+
+        self.assertEqual("test", post.title)
+        self.assertEqual("test", post.content)
+        self.assertEqual("text/markdown", post.content_type)
+
+
+
     def test_create_post(self):
         resp = self.c.post("/api/posts", {
             "title": "test",

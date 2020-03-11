@@ -135,8 +135,7 @@ def posts(request):
             privacy = visibility_table[privacy]
             if "unlisted" in data and data["unlisted"]:
                 privacy = Privacy.URL_ONLY
-        except (json.decoder.JSONDecodeError, KeyError) as e:
-            print(e)
+        except (json.decoder.JSONDecodeError, KeyError):
             return JsonResponse({}, status=400)
 
 
@@ -168,9 +167,44 @@ def authorid_posts(request, author_id):
     )
 
 
+@csrf_exempt
 @auth_api
 def post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == "PUT":
+        visibility_table = {
+            "PRIVATE": Privacy.PRIVATE,
+            #"PUBLIC": Privacy.URL_ONLY,
+            "FRIENDS": Privacy.FRIENDS,
+            "FOAF": Privacy.FOAF,
+            "PUBLIC": Privacy.PUBLIC,
+        }
+        author = Author.from_user(request.user)
+        if author is None or author != post.author:
+            return JsonResponse({}, status=401)
+
+        try:
+            data = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return JsonResponse({}, status=400)
+
+        if "title" in data:
+            post.title   = data["title"]
+        if "content" in data:
+            post.content = data["content"]
+        if "contentType" in data:
+            post.content_type = data["contentType"]
+        if "visibility" in data:
+            try:
+                post.privacy = visibility_table[data["visibility"]]
+            except KeyError:
+                return JsonResponse({}, status=400)
+        if "unlisted" in data and data["unlisted"]:
+            post.privacy = Privacy.URL_ONLY
+
+        post.save()
+
     return JsonResponse(serialize_post(request, post))
 
 
