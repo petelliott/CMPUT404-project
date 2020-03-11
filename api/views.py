@@ -251,7 +251,17 @@ def author_friends(request, author_id):
 
 @auth_api
 def author_friendswith(request, author_id, author_id2):
-    pass
+    author1 = get_object_or_404(Author, pk=author_id)
+    author2 = get_object_or_404(Author, pk=author_id2)
+
+    return JsonResponse({
+        "query": "friends",
+        "authors": [
+            api_reverse(request, "api_author", author_id=author1.pk),
+            api_reverse(request, "api_author", author_id=author2.pk),
+        ],
+        "friends": author1.friends_with(author2)
+    })
 
 
 def request_host(request):

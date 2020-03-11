@@ -252,6 +252,23 @@ class AuthorFriendsTestCase(TestCase):
         self.assertTrue("http://testserver/api/author/{}".format(self.author_A.pk)
                         in j["authors"])
 
+    def test_friend2friend(self):
+        j = self.c.get("/api/author/{}/friends/{}".format(
+            self.author_B.pk, self.author_A.pk
+        )).json()
+
+        self.assertEqual("friends", j["query"])
+        self.assertEqual(2, len(j["authors"]))
+        self.assertEqual(True, j["friends"])
+
+        j = self.c.get("/api/author/{}/friends/{}".format(
+            self.author_B.pk, self.author_C.pk
+        )).json()
+
+        self.assertEqual("friends", j["query"])
+        self.assertEqual(2, len(j["authors"]))
+        self.assertEqual(False, j["friends"])
+
     def test_post_query(self):
         j = self.c.post("/api/author/{}/friends".format(self.author_A.pk), {
             "query": "friends",
