@@ -218,8 +218,26 @@ def post_comments(request, post_id):
 def author_friends(request, author_id):
     author = get_object_or_404(Author, pk=author_id)
     if request.method == "POST":
-        #TODO will be added in part 2
-        pass
+        try:
+            data = json.loads(request.body)
+            friends = set(data["authors"])
+            #the spec also adds a extraneous "author" field
+        except (json.decoder.JSONDecodeError, KeyError):
+            return JsonResponse({}, status=400)
+
+        return JsonResponse({
+            "query": "friends",
+            "author": api_reverse(request, "api_author",
+                                  author_id=author.pk),
+            "authors": [
+                api_reverse(request, "api_author",
+                            author_id=a.pk)
+                for a in author.get_friends()
+                if api_reverse(request, "api_author",
+                               author_id=a.pk)
+                in friends
+            ],
+        })
     else:
         return JsonResponse({
             "query": "friends",
