@@ -105,7 +105,7 @@ class ViewAuthorTestCase(TestCase):
 
 class PostTestCase(TestCase):
     def setUp(self):
-        self.c = Client()
+        self.c = Client(HTTP_AUTHORIZATION="Basic YXV0aG9yOnB3")
         self.author = Author.signup("author", "pw", "pw")
         self.post = Post.objects.create(date=datetime.date.today(),
                                         title="a",
@@ -136,6 +136,59 @@ class PostTestCase(TestCase):
         self.assertEqual(exp.pk, act["id"])
         self.assertEqual("PUBLIC", act["visibility"])
         self.assertEqual(False, act["unlisted"])
+
+    def test_create_post(self):
+        resp = self.c.post("/api/posts", {
+            "title": "test",
+            "content": "f",
+            "contentType": "text/plain"
+        }, content_type="application/json")
+
+        self.assertEqual(302, resp.status_code)
+        self.assertTrue(resp.url.startswith("/api/posts/"))
+
+        j = self.c.get(resp.url).json()
+        self.assertEqual("test", j["title"])
+        self.assertEqual("f", j["content"])
+        self.assertEqual("text/plain", j["contentType"])
+        self.assertEqual("PUBLIC", j["visibility"])
+        self.assertEqual(False, j["unlisted"])
+
+    def test_create_unlisted_post(self):
+        resp = self.c.post("/api/posts", {
+            "title": "test",
+            "content": "f",
+            "contentType": "text/plain",
+            "unlisted": True
+        }, content_type="application/json")
+
+        self.assertEqual(302, resp.status_code)
+        self.assertTrue(resp.url.startswith("/api/posts/"))
+
+        j = self.c.get(resp.url).json()
+        self.assertEqual("test", j["title"])
+        self.assertEqual("f", j["content"])
+        self.assertEqual("text/plain", j["contentType"])
+        self.assertEqual("PUBLIC", j["visibility"])
+        self.assertEqual(True, j["unlisted"])
+
+    def test_create_private_post(self):
+        resp = self.c.post("/api/posts", {
+            "title": "test",
+            "content": "f",
+            "contentType": "text/plain",
+            "visibility": "PRIVATE",
+        }, content_type="application/json")
+
+        self.assertEqual(302, resp.status_code)
+        self.assertTrue(resp.url.startswith("/api/posts/"))
+
+        j = self.c.get(resp.url).json()
+        self.assertEqual("test", j["title"])
+        self.assertEqual("f", j["content"])
+        self.assertEqual("text/plain", j["contentType"])
+        self.assertEqual("PRIVATE", j["visibility"])
+        self.assertEqual(False, j["unlisted"])
 
 
 class AuthorFriendsTestCase(TestCase):
