@@ -143,7 +143,7 @@ def viewpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            image_path = '../../../media/'+image  # temporally hardcoding the path
+            image_path = polarbear.settings.MEDIA_URL+image  # temporally hardcoding the path
             print(image_path)
 
 

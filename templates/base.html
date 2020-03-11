@@ -17,7 +17,12 @@
         <a href="/" class="buttonlink">Home</a>
         <a href="{% url 'post' %}" class="buttonlink">Post</a>
         <a href="{% url 'friendposts' %}" class="buttonlink">Friends</a>
-        <a href="{% url 'logout' %}" class="buttonlink">Log Out</a>
+        <form action="/user/logout" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <input type="submit" name="logout" value="Log Out" class="buttonlink"/>
+        </form>
+        <!--<a href="{% url 'logout' %}" class="buttonlink">Log Out</a> -->
       </div>
       {% elif 'signup' in request.get_full_path %}
       <a href="{% url 'login' %}" class="buttonlink baroption">Log In</a>
