@@ -35,7 +35,7 @@ class Author(models.Model):
 
     def get_followers(self):
         return self.followers.all()
-    
+
     def get_following(self):
         return self.friends.all()
 
@@ -96,3 +96,30 @@ class Author(models.Model):
                                         password=password1)
 
         return cls.objects.create(number=60, user=user)
+
+
+class Node(models.Model):
+    enabled = models.BooleanField(default=True)
+    user = models.OneToOneField(User,
+                                on_delete=models.CASCADE,
+                                related_name='node')
+
+    @classmethod
+    def signup(cls, username, password):
+        user = User.objects.create_user(username=username,
+                                        password=password)
+        cls.objects.create(user=user)
+
+    @classmethod
+    def from_user(cls, user):
+        """
+        returns a user's Node, or None if it does not have one or
+        isn't authenticated.
+        """
+        if not user.is_authenticated:
+            return None
+
+        try:
+            return user.node
+        except cls.DoesNotExist:
+            return None

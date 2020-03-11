@@ -4,23 +4,69 @@ from django.urls import reverse
 from blog.util import paginate
 from blog.models import Privacy, Post
 from users.models import Author
+from django.contrib import auth
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import blog
 import json
+import base64
+
+
+def http_basic_authenticate(request):
+    if 'Authorization' not in request.headers:
+        return None
+
+    hval = request.headers['Authorization']
+    if not hval.startswith("Basic "):
+        return None
+
+    username, password = base64.b64decode(hval[len("Basic "):].encode("ascii"))\
+                               .decode("utf-8").split(":")
+    return auth.authenticate(request, username=username,
+                             password=password)
 
 def auth_api(func):
     def inner(request, *args, **kwargs):
         #TODO: authenticate with HTTP basic auth
+        user = http_basic_authenticate(request)
+        if user is not None:
+            auth.login(request, user)
+
         return func(request, *args, **kwargs)
 
     return inner
 
+def render_posts(request, postlist, urlbase):
+    page = int(request.GET.get("page", 0))
+    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
+
+    total = len(postlist)
+
+    def pageurl(n):
+        return "{}?page={}&size={}".format(
+            urlbase, n, size)
+
+    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
+    prev = {"previous": pageurl(page-1) } if page > 0 else {}
+
+    posts = list(paginate(postlist, page, size))
+    return JsonResponse({
+        "query": "posts",
+        "count": total,
+        "size": size,
+        **nex,
+        **prev,
+        "posts": [serialize_post(request, p) for p in posts]
+    })
+
 @auth_api
 def author_posts(request):
-    #TODO: maybe authors can use the api?
-    #      until then it's the same as posts
-    return posts()
+    return render_posts(
+        request,
+        [p for p in blog.models.Post.objects.all().order_by("-pk")
+         if p.listable_to(request.user)],
+        api_reverse(request, "api_posts")
+    )
 
 DEFAULT_PAGE_SIZE = 25
 
@@ -66,29 +112,11 @@ def serialize_post(request, post):
 
 @auth_api
 def posts(request):
-    page = int(request.GET.get("page", 0))
-    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
-
-    public = blog.models.Post.public()
-    total = public.count()
-
-    def pageurl(n):
-        return "{}?page={}&size={}".format(
-            api_reverse(request, "api_posts"),
-            n, size)
-
-    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
-    prev = {"previous": pageurl(page-1) } if page > 0 else {}
-
-    posts = list(paginate(public, page, size))
-    return JsonResponse({
-        "query": "posts",
-        "count": total,
-        "size": size,
-        **nex,
-        **prev,
-        "posts": [serialize_post(request, p) for p in posts]
-    })
+    return render_posts(
+        request,
+        blog.models.Post.public(),
+        api_reverse(request, "api_posts")
+    )
 
 
 @auth_api
