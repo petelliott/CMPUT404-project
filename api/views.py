@@ -36,11 +36,37 @@ def auth_api(func):
 
     return inner
 
+def render_posts(request, postlist, urlbase):
+    page = int(request.GET.get("page", 0))
+    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
+
+    total = len(postlist)
+
+    def pageurl(n):
+        return "{}?page={}&size={}".format(
+            urlbase, n, size)
+
+    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
+    prev = {"previous": pageurl(page-1) } if page > 0 else {}
+
+    posts = list(paginate(postlist, page, size))
+    return JsonResponse({
+        "query": "posts",
+        "count": total,
+        "size": size,
+        **nex,
+        **prev,
+        "posts": [serialize_post(request, p) for p in posts]
+    })
+
 @auth_api
 def author_posts(request):
-    #TODO: maybe authors can use the api?
-    #      until then it's the same as posts
-    return posts(request)
+    return render_posts(
+        request,
+        [p for p in blog.models.Post.objects.all().order_by("-pk")
+         if p.listable_to(request.user)],
+        api_reverse(request, "api_posts")
+    )
 
 DEFAULT_PAGE_SIZE = 25
 
@@ -86,29 +112,11 @@ def serialize_post(request, post):
 
 @auth_api
 def posts(request):
-    page = int(request.GET.get("page", 0))
-    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
-
-    public = blog.models.Post.public()
-    total = public.count()
-
-    def pageurl(n):
-        return "{}?page={}&size={}".format(
-            api_reverse(request, "api_posts"),
-            n, size)
-
-    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
-    prev = {"previous": pageurl(page-1) } if page > 0 else {}
-
-    posts = list(paginate(public, page, size))
-    return JsonResponse({
-        "query": "posts",
-        "count": total,
-        "size": size,
-        **nex,
-        **prev,
-        "posts": [serialize_post(request, p) for p in posts]
-    })
+    return render_posts(
+        request,
+        blog.models.Post.public(),
+        api_reverse(request, "api_posts")
+    )
 
 
 @auth_api
