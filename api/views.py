@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 import blog
 import json
 import base64
+import datetime
 
 
 def http_basic_authenticate(request):
@@ -110,13 +111,50 @@ def serialize_post(request, post):
     }
 
 
+@csrf_exempt
 @auth_api
 def posts(request):
-    return render_posts(
-        request,
-        blog.models.Post.public(),
-        api_reverse(request, "api_posts")
-    )
+    if request.method == "POST":
+        visibility_table = {
+            "PRIVATE": Privacy.PRIVATE,
+            #"PUBLIC": Privacy.URL_ONLY,
+            "FRIENDS": Privacy.FRIENDS,
+            "FOAF": Privacy.FOAF,
+            "PUBLIC": Privacy.PUBLIC,
+        }
+        author = Author.from_user(request.user)
+        if author is None:
+            return JsonResponse({}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            title   = data["title"]
+            content = data["content"]
+            content_type = data["contentType"]
+            privacy = data["visibility"] if "visibility" in data else "PUBLIC"
+            privacy = visibility_table[privacy]
+            if "unlisted" in data and data["unlisted"]:
+                privacy = Privacy.URL_ONLY
+        except (json.decoder.JSONDecodeError, KeyError) as e:
+            print(e)
+            return JsonResponse({}, status=400)
+
+
+        post = Post.objects.create(date=datetime.date.today(),
+                                   title=title,
+                                   content=content,
+                                   author=author,
+                                   content_type=content_type,
+                                   image=None, #TODO
+                                   privacy=privacy)
+
+        return redirect("api_post", post.pk)
+    else:
+        return render_posts(
+            request,
+            blog.models.Post.public(),
+            api_reverse(request, "api_posts")
+        )
 
 
 @auth_api
@@ -141,6 +179,7 @@ def post_comments(request, post_id):
     pass
 
 
+@csrf_exempt
 @auth_api
 def author_friends(request, author_id):
     author = get_object_or_404(Author, pk=author_id)
