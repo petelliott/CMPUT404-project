@@ -39,7 +39,7 @@ keys `"next"` and `"previous"`.
 
 request:
 ```
-GET /posts?page=1&size=1 HTTP/1.1
+GET /api/posts?page=1&size=1 HTTP/1.1
 ```
 
 response:
@@ -94,7 +94,7 @@ returns the post associated with `POST_ID`
 
 request:
 ```
-GET /posts/1 HTTP/1.1
+GET /api/posts/1 HTTP/1.1
 ```
 
 response:
@@ -130,7 +130,7 @@ updates any field ("content", "contentType", "title", "unlisted",
 
 request:
 ```json
-PUT /posts/1 HTTP/1.1
+PUT /api/posts/1 HTTP/1.1
 
 {
     "title": "this is the new title",
@@ -161,7 +161,7 @@ response:
     "visibleTo": null
 }
 ```
-### POST /posts/
+### POST /posts
 
 creates a new post, then redirects to it
 
@@ -169,7 +169,7 @@ creates a new post, then redirects to it
 
 request:
 ```json
-PUT /posts/1 HTTP/1.1
+POST /api/posts HTTP/1.1
 
 {
     "title": "test",
@@ -188,5 +188,117 @@ Location: "http://localhost:8000/api/posts/5
 ```
 
 ## Friend Management
+
+### GET /api/author/{AUTHOR_ID1}/friends/{AUTHOR_ID2}
+
+checks if two authors are friends
+
+#### example
+
+request:
+```json
+GET /api/author/1/friends/2 HTTP/1.1
+```
+
+response:
+```json
+{
+    "authors": [
+        "http://localhost:8000/api/author/1",
+        "http://localhost:8000/api/author/2"
+    ],
+    "friends": true,
+    "query": "friends"
+}
+```
+
+### GET /author/{AUTHOR_ID}/friends
+
+gets a list of all the friends of an author.
+
+#### example
+
+request:
+```json
+GET /api/author/1/friends HTTP/1.1
+```
+
+response:
+```json
+{
+    "authors": [
+        "http://localhost:8000/api/author/2",
+        "http://localhost:8000/api/author/3"
+    ],
+    "query": "friends"
+}
+```
+
+### POST /author/{AUTHOR_ID}/friends
+
+the user POSTs a list of authors, and the server response with which
+of them are friends of `AUTHOR_ID`.
+
+#### example
+
+request:
+```json
+POST /api/author/1/friends
+
+{
+    "query": "friends",
+    "authors": [
+        "http://localhost:8000/api/author/2"
+    ]
+}
+```
+
+response:
+```json
+{
+    "author": "http://localhost:8000/api/author/1",
+    "authors": [
+        "http://localhost:8000/api/author/2"
+    ],
+    "query": "friends"
+}
+```
+
+### POST/GET /friends/{AUTHOR_ID}
+
+this is an alias for `/author/{AUTHOR_ID}/friends`
+
+### POST /friendrequest
+
+create a friendrequest from one author to another
+
+### example
+
+in this example, `a` will be issueing a friendrequest to `b`.
+
+request:
+```json
+POST /api/friendrequst HTTP/1.1
+
+{
+    "query": "friendrequest",
+    "author": {
+        "id": "http://localhost:8000/api/author/1",
+        "host": "http://localhost:8000/",
+        "displayName": "a",
+        "url": "http://localhost:8000/api/author/1"
+    },
+    "friend": {
+        "id": "http://localhost:8000/api/author/2",
+        "host": "http://localhost:8000/",
+        "displayName": "b",
+        "url": "http://localhost:8000/api/author/2"
+    }
+}
+```
+
+response:
+
+some 2XX status code.
 
 ## Other
