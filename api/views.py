@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 import blog
 import json
 import base64
+import datetime
 
 
 def http_basic_authenticate(request):
@@ -110,48 +111,100 @@ def serialize_post(request, post):
     }
 
 
+@csrf_exempt
 @auth_api
 def posts(request):
-    return render_posts(
-        request,
-        blog.models.Post.public(),
-        api_reverse(request, "api_posts")
-    )
+    if request.method == "POST":
+        visibility_table = {
+            "PRIVATE": Privacy.PRIVATE,
+            #"PUBLIC": Privacy.URL_ONLY,
+            "FRIENDS": Privacy.FRIENDS,
+            "FOAF": Privacy.FOAF,
+            "PUBLIC": Privacy.PUBLIC,
+        }
+        author = Author.from_user(request.user)
+        if author is None:
+            return JsonResponse({}, status=401)
+
+        try:
+            data = json.loads(request.body)
+            title   = data["title"]
+            content = data["content"]
+            content_type = data["contentType"]
+            privacy = data["visibility"] if "visibility" in data else "PUBLIC"
+            privacy = visibility_table[privacy]
+            if "unlisted" in data and data["unlisted"]:
+                privacy = Privacy.URL_ONLY
+        except (json.decoder.JSONDecodeError, KeyError):
+            return JsonResponse({}, status=400)
+
+
+        post = Post.objects.create(date=datetime.date.today(),
+                                   title=title,
+                                   content=content,
+                                   author=author,
+                                   content_type=content_type,
+                                   image=None, #TODO
+                                   privacy=privacy)
+
+        return redirect("api_post", post.pk)
+    else:
+        return render_posts(
+            request,
+            blog.models.Post.public(),
+            api_reverse(request, "api_posts")
+        )
 
 
 @auth_api
 def authorid_posts(request, author_id):
     author = get_object_or_404(Author, pk=author_id)
-
-    page = int(request.GET.get("page", 0))
-    size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
-
-    # TODO: for future parts this will be augemented to check viewer
-    #       permissions. currently this behavior is not specified
-    public = author.posts.filter(privacy=Privacy.PUBLIC).order_by("-pk")
-    total = public.count()
-
-    def pageurl(n):
-        return "{}?page={}&size={}".format(
-            api_reverse(request, "api_authoridposts", author_id=author_id),
-            n, size)
-
-    nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
-    prev = {"previous": pageurl(page-1) } if page > 0 else {}
-
-    posts = list(paginate(public, page, size))
-    return JsonResponse({
-        "count": total,
-        "size": size,
-        **nex,
-        **prev,
-        "posts": [serialize_post(request, p) for p in posts]
-    })
+    return render_posts(
+        request,
+        [p for p in author.posts.order_by("-pk")
+         if p.listable_to(request.user)],
+        api_reverse(request, "api_authoridposts", author_id=author_id),
+    )
 
 
+@csrf_exempt
 @auth_api
 def post(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == "PUT":
+        visibility_table = {
+            "PRIVATE": Privacy.PRIVATE,
+            #"PUBLIC": Privacy.URL_ONLY,
+            "FRIENDS": Privacy.FRIENDS,
+            "FOAF": Privacy.FOAF,
+            "PUBLIC": Privacy.PUBLIC,
+        }
+        author = Author.from_user(request.user)
+        if author is None or author != post.author:
+            return JsonResponse({}, status=401)
+
+        try:
+            data = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return JsonResponse({}, status=400)
+
+        if "title" in data:
+            post.title   = data["title"]
+        if "content" in data:
+            post.content = data["content"]
+        if "contentType" in data:
+            post.content_type = data["contentType"]
+        if "visibility" in data:
+            try:
+                post.privacy = visibility_table[data["visibility"]]
+            except KeyError:
+                return JsonResponse({}, status=400)
+        if "unlisted" in data and data["unlisted"]:
+            post.privacy = Privacy.URL_ONLY
+
+        post.save()
+
     return JsonResponse(serialize_post(request, post))
 
 
@@ -160,12 +213,31 @@ def post_comments(request, post_id):
     pass
 
 
+@csrf_exempt
 @auth_api
 def author_friends(request, author_id):
     author = get_object_or_404(Author, pk=author_id)
     if request.method == "POST":
-        #TODO will be added in part 2
-        pass
+        try:
+            data = json.loads(request.body)
+            friends = set(data["authors"])
+            #the spec also adds a extraneous "author" field
+        except (json.decoder.JSONDecodeError, KeyError):
+            return JsonResponse({}, status=400)
+
+        return JsonResponse({
+            "query": "friends",
+            "author": api_reverse(request, "api_author",
+                                  author_id=author.pk),
+            "authors": [
+                api_reverse(request, "api_author",
+                            author_id=a.pk)
+                for a in author.get_friends()
+                if api_reverse(request, "api_author",
+                               author_id=a.pk)
+                in friends
+            ],
+        })
     else:
         return JsonResponse({
             "query": "friends",
@@ -179,7 +251,17 @@ def author_friends(request, author_id):
 
 @auth_api
 def author_friendswith(request, author_id, author_id2):
-    pass
+    author1 = get_object_or_404(Author, pk=author_id)
+    author2 = get_object_or_404(Author, pk=author_id2)
+
+    return JsonResponse({
+        "query": "friends",
+        "authors": [
+            api_reverse(request, "api_author", author_id=author1.pk),
+            api_reverse(request, "api_author", author_id=author2.pk),
+        ],
+        "friends": author1.friends_with(author2)
+    })
 
 
 def request_host(request):
