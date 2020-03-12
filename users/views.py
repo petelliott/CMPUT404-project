@@ -6,6 +6,8 @@ from django.contrib import auth
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
+from django.db import IntegrityError
 
 
 class LoginForm(forms.Form):
@@ -133,31 +135,26 @@ def friends(request, author_id):
                      "followers": author.get_followers(),
                      "following": author.get_following()})
 
+@require_POST
 def editProfile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
     you = models.Author.from_user(request.user)
+    form = EditProfileForm(request.POST)
 
-    if you is None:
-        return render(request, "users/profile.html", {"author": author,
-                                                      "posts": author.authors_posts(request.user)})
+    if form.is_valid():
 
-    if request.method == "POST":
-        form = EditProfileForm(request.POST)
-
-        if form.is_valid():
-            try:
-                request.user.username = form.cleaned_data["username"]
-                request.user.save()
-                return redirect("profile", author_id=you.pk)
-            except:
-                return redirect("profile", author_id=you.pk)
-
-    else:
-        form = EditProfileForm(initial={"username": request.user.username})
-
-        return render(request, "users/profile.html",
+        try:
+            request.user.username = form.cleaned_data["username"]
+            request.user.save()
+            return redirect("profile", author_id=you.pk)
+        except IntegrityError:
+            return render(request, "users/profile.html",
                       {"author": author,
                        "follows": you.follows(author),
                        "freqs": you.get_friend_requests(),
                        "posts": author.authors_posts(request.user),
-                       "form": form})      
+                       "form": form,
+                       "taken": True})
+
+
+   

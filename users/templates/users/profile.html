@@ -3,6 +3,11 @@
 {% block title %}PolarBear -- {{ author.user.username}} {% endblock %}
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/profile.css'%}">{% endblock %}
 {% block content %}
+{% if taken %}
+  <script>
+    alert("Username is taken.");
+  </script>
+{% endif %}
 
 <div class="profile-header"> 
   <h2>{{ author.user.username }}</h2>
