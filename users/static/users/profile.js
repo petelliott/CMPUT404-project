@@ -13,7 +13,7 @@ closeButton.onclick = function() {
 }
 
 // Clicking outside the form closes it
-window.onclick = function(event) {
+window.onmousedown = function(event) {
   if (event.target == form) {
     form.style.display = "none";
   }
