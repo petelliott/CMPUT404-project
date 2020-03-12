@@ -61,6 +61,9 @@ class Author(models.Model):
         else:
             return filter( lambda p: p.listable_to(user), self.posts.all())
 
+
+
+
     @classmethod
     def from_user(cls, user):
         """
