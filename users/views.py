@@ -70,22 +70,7 @@ def logout(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
             django_logout(request)
-            response = '''
-                    <p>Logout Successfully!! You will be redirected to login page in <span id="sp">1</span> seconds...</p>
-                    <script>
-                        setInterval(go, 1000);
-                        var x=0;
-                        function go() {
-                            if (x>=0){
-                                document.getElementById("sp").innerText=x;
-                            } else {
-                                location.href="/user/login" ;
-                            }
-                            x--;
-                        }
-                    </script>
-                    '''
-            return HttpResponse(response)
+            return redirect("login")
     return redirect("login")
 
 
