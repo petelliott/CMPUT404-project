@@ -18,7 +18,7 @@
       </form>
       <br>
     {% endfor %}
-    <button type="button" class="follow button">Edit Profile</button>
+    <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
   {% else %}
     <form action="{% url 'profile' author.pk %}" method="post">
       {% csrf_token %}
@@ -32,6 +32,23 @@
 
 </div>
 <div class="profile-body">
+
+  <div id="editProfileForm" class="edit-profile">
+    <div class="edit-profile-content">
+      <div class="edit-profile-header">
+        <span class="close">&times;</span>
+        <h2 class="edit-profile-title">Edit Profile</h2>
+      </div>
+ 
+      <div class="edit-profile-body">
+        <form action="{% url 'edit-profile' author.pk %}" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <input type="submit" class="save-button" value="Save">
+        </form>
+      </div>
+    </div>
+  </div>
   <ol>
     {% for post in posts %}
       <li>
@@ -42,6 +59,7 @@
     {% endfor %}
   </ol>
 </div>
-<!-- TODO: maybe put the users posts here -->
+
+<script src="{% static 'users/profile.js'%}"></script>
 
 {% endblock %}

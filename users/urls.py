@@ -7,4 +7,5 @@ urlpatterns = [
     path('logout', views.logout, name="logout"),
     path('authors/<int:author_id>',views.profile,name='profile'),
     path('authors/<int:author_id>/friends',views.friends,name='friends'),
+    path('authors/<int:author_id>/edit',views.editProfile,name='edit-profile'),
 ]

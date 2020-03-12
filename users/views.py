@@ -19,6 +19,9 @@ class SignupForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput,
                                 label="Confirm Your Password")
 
+class EditProfileForm(forms.Form):
+    username = forms.CharField()
+
 def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
@@ -95,7 +98,8 @@ def profile(request, author_id):
 
     you = models.Author.from_user(request.user)
     if you is None:
-        return render(request, "users/profile.html", {"author": author})
+        return render(request, "users/profile.html", {"author": author,
+                                                      "posts": author.authors_posts(request.user)})
 
     if request.method == "POST":
         if request.POST["action"] == "follow":
@@ -111,12 +115,15 @@ def profile(request, author_id):
 
         return redirect('profile', author_id)
     else:
+        form = EditProfileForm(initial={"username": request.user.username})
+
         print(you.get_friend_requests())
         return render(request, "users/profile.html",
                       {"author": author,
                        "follows": you.follows(author),
                        "freqs": you.get_friend_requests(),
-                       "posts": author.authors_posts(request.user)})
+                       "posts": author.authors_posts(request.user),
+                       "form": form})
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
@@ -125,3 +132,32 @@ def friends(request, author_id):
                     {"author": author,
                      "followers": author.get_followers(),
                      "following": author.get_following()})
+
+def editProfile(request, author_id):
+    author = get_object_or_404(models.Author, pk=author_id)
+    you = models.Author.from_user(request.user)
+
+    if you is None:
+        return render(request, "users/profile.html", {"author": author,
+                                                      "posts": author.authors_posts(request.user)})
+
+    if request.method == "POST":
+        form = EditProfileForm(request.POST)
+
+        if form.is_valid():
+            try:
+                request.user.username = form.cleaned_data["username"]
+                request.user.save()
+                return redirect("profile", author_id=you.pk)
+            except:
+                return redirect("profile", author_id=you.pk)
+
+    else:
+        form = EditProfileForm(initial={"username": request.user.username})
+
+        return render(request, "users/profile.html",
+                      {"author": author,
+                       "follows": you.follows(author),
+                       "freqs": you.get_friend_requests(),
+                       "posts": author.authors_posts(request.user),
+                       "form": form})      
