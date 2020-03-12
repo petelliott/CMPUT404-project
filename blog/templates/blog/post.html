@@ -3,7 +3,7 @@
 {% block content %}
 
 
-<form action="{% url 'post' %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+<form id = 'p' action="{% url 'post' %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
   {% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Post!">
@@ -15,11 +15,11 @@
 	function validateForm() {
 		if (document.getElementById('id_content_type').selectedIndex==0 || document.getElementById('id_content_type').selectedIndex==1){
 			var required_field = "content";
-			var x = document.forms[0][required_field].value;
+			var x = document.forms['p'][required_field].value;
 		}
 		else{
 			var required_field = "image";
-			var x = document.forms[0][required_field].value;
+			var x = document.forms['p'][required_field].value;
 		}
 		if (x == "") {
 			alert(required_field + " must be filled out");
@@ -35,13 +35,13 @@
 			//hide image field and display content field 
 			document.getElementsByTagName('p')[4].style.display='';
 			document.getElementsByTagName('p')[5].style.display='none';
-			document.forms[0]['image'].value = ''
+			document.forms['p']['image'].value = ''
 
 		} else {
 			// hide content and display image field
 			document.getElementsByTagName('p')[4].style.display='none';
 			document.getElementsByTagName('p')[5].style.display='';
-			document.forms[0]['content'].value = ''
+			document.forms['p']['content'].value = ''
 		}
 	}
 
