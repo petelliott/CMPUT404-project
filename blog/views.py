@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django import forms
 from blog import models
@@ -70,6 +70,7 @@ def post(request):
                                               content_type=content_type,
                                               image = image,
                                               privacy=privacy)
+            print(image)
             if post.image != None:
                 image = post.image.__str__()
                 mime  = magic.Magic(mime=True)
@@ -142,28 +143,17 @@ def viewpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            image_path = polarbear.settings.MEDIA_URL+image
+            image_path = '../../../media/'+image  # temporally hardcoding the path
             print(image_path)
 
 
     # print(mime.from_file(polarbear.settings.MEDIA_ROOT+image))
     # print(polarbear.settings.MEDIA_ROOT)
+
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
                    "content": content,
                    "image":  image_path}) 
-
-def viewpic(request,file_name):
-    file_name = "post_image/"+file_name
-    # print(file_name)
-    post = get_object_or_404(models.Post, image=file_name)
-    # print(post.viewable_by(request.user))
-    if not post.viewable_by(request.user):
-        raise PermissionDenied
-
-    with open(polarbear.settings.MEDIA_ROOT+file_name, "rb") as f:
-        return HttpResponse(f.read(), content_type=post.content_type)
-
 
 def allposts(request):
     return render(request, "blog/postlist.html",
