@@ -19,7 +19,6 @@
         <a href="{% url 'friendposts' %}" class="buttonlink">Friends</a>
         <form action="/user/logout" method="post">
           {% csrf_token %}
-          {{ form.as_p }}
           <input type="submit" name="logout" value="Log Out" class="buttonlink"/>
         </form>
         <!--<a href="{% url 'logout' %}" class="buttonlink">Log Out</a> -->
