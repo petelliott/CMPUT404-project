@@ -302,3 +302,41 @@ response:
 some 2XX status code.
 
 ## Other
+
+### GET /author/{AUTHOR_ID}
+
+get an author's profile, as well as a list of their friends
+
+#### example
+
+request:
+```json
+GET /api/author/1
+```
+
+response:
+```json
+{
+    "displayName": "a",
+    "friends": [
+        {
+            "displayName": "b",
+            "github": null,
+            "host": "http://localhost:8000/api/",
+            "id": "http://localhost:8000/api/author/2",
+            "url": "http://localhost:8000/api/author/2"
+        },
+        {
+            "displayName": "c",
+            "github": null,
+            "host": "http://localhost:8000/api/",
+            "id": "http://localhost:8000/api/author/3",
+            "url": "http://localhost:8000/api/author/3"
+        }
+    ],
+    "github": null,
+    "host": "http://localhost:8000/api/",
+    "id": "http://localhost:8000/api/author/1",
+    "url": "http://localhost:8000/api/author/1"
+}
+```
