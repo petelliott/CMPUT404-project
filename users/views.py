@@ -73,7 +73,6 @@ def logout(request):
             response = '''
                     <p>Logout Successfully!! You will be redirected to login page in <span id="sp">1</span> seconds...</p>
                     <script>
-
                         setInterval(go, 1000);
                         var x=0;
                         function go() {
