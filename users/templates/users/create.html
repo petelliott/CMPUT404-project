@@ -16,9 +16,7 @@
 {% if sucess %}
 <script>
   alert("You sucessfully sign up! Please wait for Admin to confirm!");
-  window.setTimeout(function(){
-    window.location.href = "https://cmput404w20t06.herokuapp.com/blog/posts/all";
-  },3000);
+  window.location.href = "{% url 'allposts' %}";
 </script>
 {% endif %}
 {% if not sucess %}

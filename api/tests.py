@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from users.models import Author
 from blog.models import Post, Privacy
@@ -107,6 +108,9 @@ class PostTestCase(TestCase):
     def setUp(self):
         self.c = Client(HTTP_AUTHORIZATION="Basic YXV0aG9yOnB3")
         self.author = Author.signup("author", "pw", "pw")
+        u = User.objects.get(username='author')
+        u.is_active = True
+        u.save()
         self.post = Post.objects.create(date=datetime.date.today(),
                                         title="a",
                                         content="a",
@@ -309,6 +313,9 @@ class AuthorPostsTestCase(TestCase):
         self.c = Client()
         self.author_A = Author.signup("author_A", "pw", "pw")
         self.author_B = Author.signup("author_B", "pw", "pw")
+
+        self.author_A.is_active = True
+        self.author_B.is_active = True
 
         self.posts = [
             Post.objects.create(date=datetime.date.today(),
