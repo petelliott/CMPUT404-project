@@ -6,9 +6,12 @@ from django.contrib import auth
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import IntegrityError
 
+def toast(request):
+    messages.success(request,"Sign up successully but please wait for approve")
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -35,7 +38,8 @@ def signup(request):
 
             try:
                 author = models.Author.signup(username, password, password2)
-                auth.login(request, author.user)
+                return render(request,"users/create.html",{"form":form,"sucess":True})
+                #auth.login(request, author.user)
                 return redirect("root")
             except models.Author.UserNameTaken:
                 return render(request, "users/create.html",

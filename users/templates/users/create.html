@@ -13,6 +13,13 @@
   alert("this username is taken. Please try again.");
 </script>
 {% endif %}
+{% if sucess %}
+<script>
+  alert("You sucessfully sign up! Please wait for Admin to confirm!");
+  window.location.href = "{% url 'allposts' %}";
+</script>
+{% endif %}
+{% if not sucess %}
 <h3 align='center' class= 'signup_header'> Create Your Account </h3>
 <div class = "signup_main_block">
 <form action="{% url 'signup' %}" method="post" class="loginsignupform">
@@ -21,6 +28,7 @@
     <br>
     <input type="submit" value="Sign Up" class = 'signup_btn'>
 </form>
+{% endif %}
 </div>
 
 {% endblock %}

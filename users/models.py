@@ -10,6 +10,7 @@ class Author(models.Model):
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='author')
+    create_time = models.DateTimeField(auto_now = True)
 
     def follow(self, other):
         self.friends.add(other)
@@ -61,6 +62,9 @@ class Author(models.Model):
         else:
             return filter( lambda p: p.listable_to(user), self.posts.all())
 
+    def __str__(self):
+        return self.user.get_username()
+
 
 
 
@@ -97,6 +101,8 @@ class Author(models.Model):
 
         user = User.objects.create_user(username=username,
                                         password=password1)
+        user.is_active = False
+        user.save()
 
         return cls.objects.create(number=60, user=user)
 
