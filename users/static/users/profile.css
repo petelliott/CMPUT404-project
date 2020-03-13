@@ -18,6 +18,31 @@
     overflow: auto;
 }
 
+.friends{
+    padding-right: 15px;
+}
+
+a{
+    text-decoration: none;
+    color:grey;
+}
+
+a:hover{
+    color:black;
+}
+
+b{
+    color:black;
+}
+
+.freqs{
+    font-size: x-small;
+    background-color: red;
+    border-radius: 2px;
+    color: white;
+    padding: 1px 4px;
+}
+
 .button{
     padding: 10px 20px;
     text-align: center;

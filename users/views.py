@@ -97,8 +97,8 @@ def logout(request):
 
 def profile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
-
     you = models.Author.from_user(request.user)
+
     if you is None:
         return render(request, "users/profile.html", {"author": author,
                                                       "posts": author.authors_posts(request.user)})
@@ -125,15 +125,21 @@ def profile(request, author_id):
                        "follows": you.follows(author),
                        "freqs": you.get_friend_requests(),
                        "posts": author.authors_posts(request.user),
+                       "followers": author.get_followers(),
+                       "following": author.get_following(),
+                       "friends": author.get_friends(),
                        "form": form})
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
+    you = models.Author.from_user(request.user)
 
     return render(request, "users/friends.html",
                     {"author": author,
                      "followers": author.get_followers(),
-                     "following": author.get_following()})
+                     "following": author.get_following(),
+                     "friends": author.get_friends(),
+                     "freqs": you.get_friend_requests(),})
 
 @require_POST
 def editProfile(request, author_id):
