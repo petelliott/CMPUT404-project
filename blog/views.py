@@ -100,9 +100,15 @@ def edit(request, post_id):
             author = request.user.author
 
             post.title = form.cleaned_data["title"]
-            post.content = form.cleaned_data["content"]
-            post.privacy = form.cleaned_data["privacy"]
             post.content_type = form.cleaned_data["content_type"]
+            post.privacy = form.cleaned_data["privacy"]
+            post.content = form.cleaned_data["content"]
+
+            post.image = form.cleaned_data['image']
+            if post.image != None:
+                image = post.image.__str__()
+                mime  = magic.Magic(mime=True)
+                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
             post.save()
 
             return redirect("viewpost", post_id=post.pk)
@@ -110,6 +116,7 @@ def edit(request, post_id):
         form = PostForm(initial={"title": post.title,
                                  "content": post.content,
                                  "privacy": post.privacy,
+                                 "image": post.image,
                                  "content_type": post.content_type})
 
     return render(request, "blog/edit.html",
