@@ -10,13 +10,8 @@
 {% endif %}
 
 <div class="profile-header"> 
-  <h2>{{ author.user.username }}</h2><br>
-  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ followers|length }}</b> Followers</a></span>
-  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ following|length }}</b> Following</a></span>
-  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ friends|length }}</b> Friends {% if  freqs|length  > 0 %}<b class="freqs">{{ freqs|length }}</b>{% endif %}</a></span>
-  
   {% if author and author.user == user %}
-    <br><button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
+    <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
   {% else %}
     <form action="{% url 'profile' author.pk %}" method="post">
       {% csrf_token %}
@@ -27,6 +22,12 @@
       {% endif %}
     </form>
   {% endif %}
+  <h2>{{ author.user.username }}</h2><br>
+  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ followers|length }}</b> Followers</a></span>
+  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ following|length }}</b> Following</a></span>
+  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ friends|length }}</b> Friends {% if  freqs|length  > 0 and author.user == user %}<b class="freqs">{{ freqs|length }}</b>{% endif %}</a></span>
+  
+  
 
 </div>
 <div class="profile-body">
