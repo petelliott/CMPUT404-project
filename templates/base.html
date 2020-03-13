@@ -16,7 +16,7 @@
         <a href="{% url 'profile' user.author.pk %}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
         <a href="{% url 'post' %}" class="buttonlink">Post</a>
-        <form action="/user/logout" method="post">
+        <form action="{% url 'logout' %}" method="post">
           {% csrf_token %}
           <input type="submit" name="logout" value="Log Out" class="buttonlink"/>
         </form>
@@ -25,7 +25,7 @@
       <div class="baroption">
         <p>welcome, {{ user.username }}</p>
         <a href="/" class="buttonlink">Home</a>
-        <form action="/user/logout" method="post">
+        <form action="{% url 'logout' %}" method="post">
           {% csrf_token %}
           <input type="submit" name="logout" value="Log Out" class="buttonlink"/>
         </form>
