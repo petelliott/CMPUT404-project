@@ -11,11 +11,15 @@
 {% endif %}
 
 {% if post.content_type == "text/plain" %}
-<p>{{ content }}</p>
+	<p>{{ content }}</p>
 {% elif post.content_type == "text/markdown" %}
-{% autoescape off %}
-{{ content }}
-{% endautoescape %}
+	{% autoescape off %}
+	{{ content }}
+	{% endautoescape %}
+{% else %}
+	{% if post.image %}
+		<img src = "{{ image }}" alt ="haha" >
+	{% endif %}
 {% endif %}
 
 {% endblock %}

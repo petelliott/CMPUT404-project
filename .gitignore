@@ -5,3 +5,9 @@ staticfiles/
 # macOS layout file
 .DS_Store
 **/.DS_Store
+
+
+# images
+*/media
+media
+

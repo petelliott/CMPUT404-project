@@ -1,33 +1,47 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}PolarBear -- {{ author.user.username}} {% endblock %}
+{% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/profile.css'%}">{% endblock %}
 {% block content %}
 
-<h2>{{ author.user.username }}</h2>
-
-{% if author and author.user == user %}
-<p>Friend Requests:</p>
-{% for freq in freqs %}
-<form action="{% url 'profile' freq.pk %}" method="post">
-  {% csrf_token %}
-  <label>{{ freq.user.username }}</label>
-  <button name="action" type="submit" value="accept-request">Accept</button>
-  <button name="action" type="submit" value="reject-request">Reject</button>
-</form>
-<br>
-{% endfor %}
-{% else %}
-<form action="{% url 'profile' author.pk %}" method="post">
-  {% csrf_token %}
-  {% if not user.is_authenticated %}
-  <input name="action" type="submit" value="follow" disabled>
-  {% elif follows %}
-  <input name="action" type="submit" value="un-follow">
+<div class="profile-header"> 
+  <h2>{{ author.user.username }}</h2>
+  <a href={% url 'friends' author.pk %}>Friends</a>
+  {% if author and author.user == user %}
+    <p>Friend Requests:</p>
+    {% for freq in freqs %}
+      <form action="{% url 'profile' freq.pk %}" method="post">
+      {% csrf_token %}
+      <label>{{ freq.user.username }}</label>
+      <button name="action" type="submit" value="accept-request">Accept</button>
+      <button name="action" type="submit" value="reject-request">Reject</button>
+      </form>
+      <br>
+    {% endfor %}
+    <button type="button" class="follow button">Edit Profile</button>
   {% else %}
-  <input name="action" type="submit" value="follow">
+    <form action="{% url 'profile' author.pk %}" method="post">
+      {% csrf_token %}
+      {% if follows %}
+      <input class="unfollow button" name="action" type="submit" value="un-follow">
+      {% else %}
+      <input class="follow button" name="action" type="submit" value="follow">
+      {% endif %}
+    </form>
   {% endif %}
-</form>
 
-{% endif %}
+</div>
+<div class="profile-body">
+  <ol>
+    {% for post in posts %}
+      <li>
+        <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
+        --
+        <a href="{% url 'profile' post.author.pk %}">{{ post.author.user.username }}</a>
+      </li>
+    {% endfor %}
+  </ol>
+</div>
 <!-- TODO: maybe put the users posts here -->
 
 {% endblock %}

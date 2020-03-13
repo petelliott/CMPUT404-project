@@ -1,0 +1,22 @@
+
+.friends-body{
+    margin-left:20%; 
+    margin-right:20%; 
+    border-style: solid;
+    border-color: lightgray;
+    border-width: 1px;
+}
+
+.followers {
+    width: 50%;
+    
+    background: white;
+    float: left;
+}
+
+.following {
+    width: 50%;
+
+    background: white;
+    float: right;
+}

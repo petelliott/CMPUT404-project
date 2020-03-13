@@ -33,7 +33,7 @@ def signup(request):
 
             try:
                 author = models.Author.signup(username, password, password2)
-
+                return render(request,"users/create.html",{"form":form,"sucess":True})
                 #auth.login(request, author.user)
                 return redirect("root")
             except models.Author.UserNameTaken:
@@ -44,8 +44,6 @@ def signup(request):
                               {"form": form, "nomatch": True})
     else:
         form = SignupForm()
-    
-
 
     return render(request, "users/create.html", {"form": form})
 
@@ -73,27 +71,11 @@ def login(request):
 
 @login_required
 def logout(request):
-    if request.user.is_authenticated:
-        django_logout(request)
-        response = '''
-                <p>Logout Successfully!! You will be redirected to login page in <span id="sp">1</span> seconds...</p>
-                <script>
-
-                    setInterval(go, 1000);
-                    var x=0;
-                    function go() {
-                        if (x>=0){
-                            document.getElementById("sp").innerText=x;
-                        } else {
-                            location.href="/user/login" ;
-                        }
-                        x--;
-                    }
-                </script>
-                '''
-        return HttpResponse(response)
-    else:
-        return redirect("login")
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            django_logout(request)
+            return redirect("login")
+    return redirect("login")
 
 
 def profile(request, author_id):
@@ -121,4 +103,13 @@ def profile(request, author_id):
         return render(request, "users/profile.html",
                       {"author": author,
                        "follows": you.follows(author),
-                       "freqs": you.get_friend_requests()})
+                       "freqs": you.get_friend_requests(),
+                       "posts": author.authors_posts(request.user)})
+
+def friends(request, author_id):
+    author = get_object_or_404(models.Author, pk=author_id)
+
+    return render(request, "users/friends.html",
+                    {"author": author,
+                     "followers": author.get_followers(),
+                     "following": author.get_following()})
