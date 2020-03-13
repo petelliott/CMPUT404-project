@@ -1,3 +1,36 @@
+.navigation {
+    overflow: hidden;
+    border-bottom: 1px solid lightgray;
+    background-color: white;
+}
+  
+.navigation button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    cursor: pointer;
+    padding: 20px;
+    width:33.33%;
+    transition: 0.3s;
+    font-size: 15px;
+    font-weight: bold;
+}
+  
+.navigation button:hover {
+    background-color: #2e7bcd2d;
+    color: #2e7acd;
+}
+  
+.navigation button.active {
+    color: #2e7acd;
+    border-bottom: 2px solid #2e7acd;
+}
+  
+  
+.content {
+    padding: 5px 15px;
+}
+
 
 .friends-body{
     margin-left:20%; 
@@ -7,16 +40,3 @@
     border-width: 1px;
 }
 
-.followers {
-    width: 50%;
-    
-    background: white;
-    float: left;
-}
-
-.following {
-    width: 50%;
-
-    background: white;
-    float: right;
-}
