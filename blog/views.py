@@ -177,4 +177,5 @@ def friends(request):
 
     return render(request, "blog/postlist.html",
                   {"posts": author.friends_posts(),
-                   "title": "Friend's Posts"})
+                   "title": "Friend's Posts",
+                   "fPosts": True})
