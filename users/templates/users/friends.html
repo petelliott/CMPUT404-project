@@ -16,7 +16,6 @@
         <div class="friends">            
             <ul>
             {% if author and author.user == user and freqs|length  > 0 %}
-                <li>Friend Requests</li>
                 {% for freq in freqs %}
                 <li>
                     <form action="{% url 'profile' freq.pk %}" method="post">
@@ -27,15 +26,15 @@
                     </form>
                 </li>              
                 {% endfor %}
-                <li>--</li>
-                <li>Friends</li>
             {% endif %}
+            </ul>
             
-            
+            <ul>
             {% for f in friends %}
                 <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
             {% endfor %}
             </ul>
+            
         </div>
     </div>
 
