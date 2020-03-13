@@ -136,10 +136,24 @@ def friends(request, author_id):
 
     return render(request, "users/friends.html",
                     {"author": author,
-                     "followers": author.get_followers(),
-                     "following": author.get_following(),
                      "friends": author.get_friends(),
-                     "freqs": you.get_friend_requests(),})
+                     "freqs": you.get_friend_requests()})
+
+def following(request, author_id):
+    author = get_object_or_404(models.Author, pk=author_id)
+    you = models.Author.from_user(request.user)
+
+    return render(request, "users/following.html",
+                    {"author": author,
+                     "following": author.get_following()})
+
+def followers(request, author_id):
+    author = get_object_or_404(models.Author, pk=author_id)
+    you = models.Author.from_user(request.user)
+
+    return render(request, "users/followers.html",
+                    {"author": author,
+                     "followers": author.get_followers()})
 
 @require_POST
 def editProfile(request, author_id):
