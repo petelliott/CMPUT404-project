@@ -3,22 +3,15 @@
 {% block title %}PolarBear -- {{ author.user.username}} {% endblock %}
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/profile.css'%}">{% endblock %}
 {% block content %}
+{% if taken %}
+  <script>
+    alert("Username is taken.");
+  </script>
+{% endif %}
 
 <div class="profile-header"> 
-  <h2>{{ author.user.username }}</h2>
-  <a href={% url 'friends' author.pk %}>Friends</a>
   {% if author and author.user == user %}
-    <p>Friend Requests:</p>
-    {% for freq in freqs %}
-      <form action="{% url 'profile' freq.pk %}" method="post">
-      {% csrf_token %}
-      <label>{{ freq.user.username }}</label>
-      <button name="action" type="submit" value="accept-request">Accept</button>
-      <button name="action" type="submit" value="reject-request">Reject</button>
-      </form>
-      <br>
-    {% endfor %}
-    <button type="button" class="follow button">Edit Profile</button>
+    <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
   {% else %}
     <form action="{% url 'profile' author.pk %}" method="post">
       {% csrf_token %}
@@ -29,9 +22,32 @@
       {% endif %}
     </form>
   {% endif %}
+  <h2>{{ author.user.username }}</h2><br>
+  <span class="friends"><a href={% url 'followers' author.pk %}><b>{{ followers|length }}</b> Followers</a></span>
+  <span class="friends"><a href={% url 'following' author.pk %}><b>{{ following|length }}</b> Following</a></span>
+  <span class="friends"><a href={% url 'friends' author.pk %}><b>{{ friends|length }}</b> Friends {% if  freqs|length  > 0 and author.user == user %}<b class="freqs">{{ freqs|length }}</b>{% endif %}</a></span>
+  
+  
 
 </div>
 <div class="profile-body">
+
+  <div id="editProfileForm" class="edit-profile">
+    <div class="edit-profile-content">
+      <div class="edit-profile-header">
+        <span class="close">&times;</span>
+        <h2 class="edit-profile-title">Edit Profile</h2>
+      </div>
+ 
+      <div class="edit-profile-body">
+        <form action="{% url 'edit-profile' author.pk %}" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <input type="submit" class="save-button" value="Save">
+        </form>
+      </div>
+    </div>
+  </div>
   <ol>
     {% for post in posts %}
       <li>
@@ -42,6 +58,7 @@
     {% endfor %}
   </ol>
 </div>
-<!-- TODO: maybe put the users posts here -->
+
+<script src="{% static 'users/profile.js'%}"></script>
 
 {% endblock %}
