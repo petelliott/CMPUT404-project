@@ -73,9 +73,9 @@ def post(request):
             if post.image != None:
                 image = post.image.__str__()
                 mime  = magic.Magic(mime=True)
+                # This function will return a mime type of this file
                 post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
             post.save()
-
 
             return redirect("viewpost", post_id=post.pk)
     else:
@@ -94,23 +94,27 @@ def edit(request, post_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = PostForm(request.POST,request.FILES)
 
         if form.is_valid():
             author = request.user.author
 
             post.title = form.cleaned_data["title"]
-            post.content_type = form.cleaned_data["content_type"]
-            post.privacy = form.cleaned_data["privacy"]
             post.content = form.cleaned_data["content"]
-
+            post.privacy = form.cleaned_data["privacy"]
+            post.content_type = form.cleaned_data["content_type"]
             post.image = form.cleaned_data['image']
+            # Using post.save() to save our image first
+            # Then we can use magic to check the mime type of image
+            post.save()
+
             if post.image != None:
                 image = post.image.__str__()
                 mime  = magic.Magic(mime=True)
-                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
-            post.save()
+                # This function will return a mime type of this file
+                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)                
 
+            post.save()   # Update our content_type if there is an image
             return redirect("viewpost", post_id=post.pk)
     else:
         form = PostForm(initial={"title": post.title,
@@ -149,12 +153,11 @@ def viewpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
+            print("image: " + post.image.__str__())
             image_path = polarbear.settings.MEDIA_URL+image
             print(image_path)
 
 
-    # print(mime.from_file(polarbear.settings.MEDIA_ROOT+image))
-    # print(polarbear.settings.MEDIA_ROOT)
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
                    "content": content,

@@ -2,8 +2,7 @@
 {% load static %}
 {% block title %}PolarBear -- Editing{% endblock %}
 {% block content %}
-
-<form id = 'p' action="{% url 'edit' post.pk %}" method="post">
+<form id = 'p' action="{% url 'edit' post.pk %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
   {% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Save">

@@ -42,7 +42,7 @@ function autohide(){
 		document.forms['p']['content'].value = ''
 	}
 }
-
+document.getElementById('id_content_type').selectedIndex=0
 console.log(document.getElementById('id_content_type').selectedIndex);
 autohide();
 document.getElementById('id_content_type').onchange = autohide;
