@@ -10,17 +10,25 @@
   <body>
     <div class="mainbar">
       <h1><a href="/" class="nolinkstyle">PolarBear</a></h1>
-      {% if user and user.is_authenticated %}
+      {% if user and user.is_authenticated and user.author%}
       <div class="baroption">
         <p>welcome, {{ user.username }}</p>
         <a href="{% url 'profile' user.author.pk %}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
         <a href="{% url 'post' %}" class="buttonlink">Post</a>
-        <form action="/user/logout" method="post">
+        <form action="{% url 'logout' %}" method="post">
           {% csrf_token %}
           <input type="submit" name="logout" value="Log Out" class="buttonlink"/>
         </form>
-        <!--<a href="{% url 'logout' %}" class="buttonlink">Log Out</a> -->
+      </div>
+      {% elif user and user.is_authenticated %}
+      <div class="baroption">
+        <p>welcome, {{ user.username }}</p>
+        <a href="/" class="buttonlink">Home</a>
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <input type="submit" name="logout" value="Log Out" class="buttonlink"/>
+        </form>
       </div>
       {% elif 'signup' in request.get_full_path %}
       <a href="{% url 'login' %}" class="buttonlink baroption">Log In</a>

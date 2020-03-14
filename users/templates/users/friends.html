@@ -4,23 +4,41 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/friends.css'%}">{% endblock %}
 {% block content %}
 
+
 <div class="friends-body">
-    <div class="followers">
-        <h1>Followers</h1>
-        <ul>
-        {% for f in followers %}
-            <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
-        {% endfor %}
-        </ul>
+    <div class="navigation">
+        <button onclick="window.location.href = '{% url 'followers' author.pk %}';">Followers</button>
+        <button onclick="window.location.href = '{% url 'following' author.pk %}';">Following</button>
+        <button class="active" onclick="window.location.href = '{% url 'friends' author.pk %}';">Friends</button>
     </div>
 
-    <div class="following">
-        <h1>Following</h1>
-        <ul>
-        {% for f in following %}
-            <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
-        {% endfor %}
-        </ul>
+    <div class="content">
+        <div class="friends">            
+            <ul>
+            {% if author and author.user == user and freqs|length  > 0 %}
+                {% for freq in freqs %}
+                <li>
+                    <form action="{% url 'profile' freq.pk %}" method="post">
+                        {% csrf_token %}
+                        <label>{{ freq.user.username }}</label>
+                        <button name="action" type="submit" value="accept-request">Accept</button>
+                        <button name="action" type="submit" value="reject-request">Reject</button>
+                    </form>
+                </li>              
+                {% endfor %}
+            {% endif %}
+            </ul>
+            
+            <ul>
+            {% for f in friends %}
+                <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
+            {% endfor %}
+            </ul>
+            
+        </div>
     </div>
+
+    
+
 </div>
 {% endblock %}

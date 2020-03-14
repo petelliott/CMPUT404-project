@@ -24,7 +24,7 @@ import blog
 urlpatterns = [
     path('', lambda req: redirect('allposts'), name="root"),
     path('user/', include('users.urls')),
-    path('blog/', include('blog.urls')),
+    path('blog/', include('blog.urls'),name= "blog"),
     path('api/', include('api.urls')),
     path('admin/', admin.site.urls),
     path('media/post_image/<str:file_name>', blog.views.viewpic)
