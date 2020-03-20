@@ -12,6 +12,8 @@ from django.views.decorators.http import require_POST
 import commonmark
 import polarbear.settings 
 import magic
+import requests
+import json
 
 
 class PostForm(forms.Form):
@@ -174,11 +176,19 @@ def viewpic(request,file_name):
     with open(polarbear.settings.MEDIA_ROOT+file_name, "rb") as f:
         return HttpResponse(f.read(), content_type=post.content_type)
 
+def getPublicPosts():
+    node = 'https://cmput404w20t06.herokuapp.com/api'
+    api = '/posts'
+    json_resp = requests.get(node+api).json()['posts']
+    
+    return json_resp
 
 def allposts(request):
+    
     return render(request, "blog/postlist.html",
                   {"posts": models.Post.public(),
-                   "title": "Public Posts"})
+                   "title": "Public Posts",
+                   "test": getPublicPosts()})
 
 def friends(request):
     author = users.models.Author.from_user(request.user)

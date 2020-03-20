@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import IntegrityError
+import requests
+import json
 
 def toast(request):
     messages.success(request,"Sign up successully but please wait for approve")
@@ -82,9 +84,17 @@ def logout(request):
             return redirect("login")
     return redirect("login")
 
+def getExternalAuthor():
+    
+    json_resp = requests.get('https://cmput404w20t06.herokuapp.com/api/author/4').json()
+    
+    return json_resp
 
 def profile(request, author_id):
+ 
     author = get_object_or_404(models.Author, pk=author_id)
+
+    
     you = models.Author.from_user(request.user)
 
     if you is None:
@@ -116,7 +126,8 @@ def profile(request, author_id):
                        "followers": author.get_followers(),
                        "following": author.get_following(),
                        "friends": author.get_friends(),
-                       "form": form})
+                       "form": form,
+                       "test": getExternalAuthor()})
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)

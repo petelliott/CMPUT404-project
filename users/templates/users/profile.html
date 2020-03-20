@@ -8,7 +8,7 @@
     alert("Username is taken.");
   </script>
 {% endif %}
-
+<p style="color:red;">{{test}}</p>
 <div class="profile-header"> 
   {% if author and author.user == user %}
     <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
