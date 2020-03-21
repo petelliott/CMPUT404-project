@@ -133,3 +133,7 @@ class Node(models.Model):
             return user.node
         except cls.DoesNotExist:
             return None
+        
+    @classmethod
+    def allNodes(cls):
+        return cls.objects.all()
