@@ -109,6 +109,7 @@ class Author(models.Model):
 
 class Node(models.Model):
     enabled = models.BooleanField(default=True)
+    service = models.URLField(max_length=250, null=True)
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='node')
