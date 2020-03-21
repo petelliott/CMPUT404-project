@@ -177,21 +177,34 @@ def viewpic(request,file_name):
         return HttpResponse(f.read(), content_type=post.content_type)
 
 def nodeToPost(n):
-    #author, image
+    posts = []
 
     # Cheap hack until everyone has proper APIs
     if(n.service == "https://spongebook-develop.herokuapp.com/api"):
         json_resp = requests.get(n.service+"/post/").json()
+
+        for p in json_resp:
+            post_user = auth.models.User(username=p['author'])
+            post_author = models.Author(id=p['author'] ,user = post_user)
+            posts.append(models.Post(id=p['id'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
+
     elif(n.service == "https://cloud-align-server.herokuapp.com"):
         json_resp = requests.get(n.service+"/posts", headers={"Authorization":"Token d319c1aa88b6bf314faee4179b3a817ecbb9516d"}).json()
+
+        for p in json_resp:
+            post_user = auth.models.User(username=p['author_data']['displayName'])
+            post_author = models.Author(id=p['author'] ,user = post_user)
+            posts.append(models.Post(id=p['id'], date=p['publish'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
+
     else:    
         json_resp = requests.get(n.service+"/posts").json()['posts']
-        
-    #author = getPostAuthor()
-    #posts = models.Post(date="2020-03-19T22:44:50.977847Z",title="Hello World", content="Testing", content_type ="text/plain", 
-    # image="", privacy=4)
 
-    return json_resp#[posts]
+        for p in json_resp:
+            post_user = auth.models.User(username=p['author']['displayName'])
+            post_author = models.Author(id=p['author']['id'] ,user = post_user)
+            posts.append(models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))    
+
+    return posts
 
 def getPublicPosts():
     #node = 'https://cmput404w20t06.herokuapp.com/api'
@@ -199,11 +212,10 @@ def getPublicPosts():
     #json_resp = requests.get(node+api).json()['posts']
 
     nodes = users.models.Node.allNodes()
-
     allPosts = []
 
     for n in nodes:
-
+        #if n.id == 2:
         posts = nodeToPost(n)
         allPosts += posts
         #return [s.service]

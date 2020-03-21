@@ -11,6 +11,7 @@ class Author(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='author')
     create_time = models.DateTimeField(auto_now = True)
+    github = models.TextField(null = True) 
 
     def follow(self, other):
         self.friends.add(other)

@@ -20,9 +20,14 @@
           <ul>
             {% for post in test %}
             <li>
-              <a href="{{ post.origin }}">{{ post.title }}</a>
+              {% comment %}
+              <a href="{% url 'viewpost' post.id %}">{{ post.title }}</a>
               --
-              <a>{{ post.author.displayName }}</a>
+              <a href="{% url 'profile' post.author.id %}">{{ post.author.user.username }}</a>
+              {% endcomment %}
+              <a href="{% url 'viewpost' 4 %}">{{ post.title }}</a>
+              --
+              <a href="{% url 'profile' 4 %}">{{ post.author.user.username }}</a>
             </li>
             {% endfor %}
             {% for post in posts %}
