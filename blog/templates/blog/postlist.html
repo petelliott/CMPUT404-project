@@ -14,7 +14,7 @@
       <button onclick="window.location.href = '{% url 'friendposts' %}';">Friends' Posts</button>
     {% endif %}
   </div>
-  <p style="color:red;">{{test}}</p>
+  <p style="color:red;">Debugging Info:<br>{{test}}</p>
   <div class="content">
       <div class="posts">            
           <ul>
@@ -23,11 +23,11 @@
               {% comment %}
               <a href="{% url 'viewpost' post.id %}">{{ post.title }}</a>
               --
-              <a href="{% url 'profile' post.author.id %}">{{ post.author.user.username }}</a>
+              
               {% endcomment %}
               <a href="{% url 'viewpost' 4 %}">{{ post.title }}</a>
               --
-              <a href="{% url 'profile' 4 %}">{{ post.author.user.username }}</a>
+              <a href="{% url 'external-profile' post.author.id|urlencode:"" %}">{{ post.author.user.username }}</a>
             </li>
             {% endfor %}
             {% for post in posts %}

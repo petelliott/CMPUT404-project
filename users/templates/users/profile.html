@@ -8,7 +8,7 @@
     alert("Username is taken.");
   </script>
 {% endif %}
-<p style="color:red;">{{test}}</p>
+<p style="color:red;">Debugging Info:<br>{{test}}</p>
 <div class="profile-header"> 
   {% if author and author.user == user %}
     <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
@@ -54,6 +54,13 @@
         <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
         --
         <a href="{% url 'profile' post.author.pk %}">{{ post.author.user.username }}</a>
+      </li>
+    {% endfor %}
+    {% for post in test %}
+      <li>
+        <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
+        --
+        <a href="{% url 'external-profile' post.author.id|urlencode:"" %}">{{ post.author.user.username }}</a>
       </li>
     {% endfor %}
   </ol>

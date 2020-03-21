@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django import forms
 from users import models
+import blog.models
 from django.contrib import auth
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.db import IntegrityError
 import requests
 import json
+from urllib.parse import unquote
 
 def toast(request):
     messages.success(request,"Sign up successully but please wait for approve")
@@ -84,11 +86,40 @@ def logout(request):
             return redirect("login")
     return redirect("login")
 
-def getExternalAuthor():
-    
-    json_resp = requests.get('https://cmput404w20t06.herokuapp.com/api/author/4').json()
-    
-    return json_resp
+def getExtPosts(author_origin):
+    posts = []
+    posts_json = requests.get(unquote(author_origin)+"/posts").json()['posts']
+    for p in posts_json:
+        post_user = auth.models.User(username=p['author']['displayName'])
+        '''
+        post_author = models.Author(id=p['author']['id'] ,user = post_user)
+        posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
+        '''
+        # TODO: currently using place holder ids
+        post_author = models.Author(id=p['author']['id'] ,user = post_user)
+        posts.append(blog.models.Post(id=1, date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
+        
+    return posts
+
+def extProfile(request, author_origin):
+
+    author_json = requests.get(unquote(author_origin)).json()
+    posts = getExtPosts(author_origin)
+
+    user = auth.models.User(username=author_json['displayName'])
+    author = models.Author(id=1 ,user = user)
+
+    you = models.Author.from_user(request.user)
+
+    return render(request, "users/profile.html",
+                    {"author": author,
+                    "follows": [],
+                    "posts": [],
+                    "followers": author_json['friends'],
+                    "following": author_json['friends'],
+                    "friends": author_json['friends'],
+                    "test":posts})
+
 
 def profile(request, author_id):
  
@@ -126,8 +157,7 @@ def profile(request, author_id):
                        "followers": author.get_followers(),
                        "following": author.get_following(),
                        "friends": author.get_friends(),
-                       "form": form,
-                       "test": getExternalAuthor()})
+                       "form": form})
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
