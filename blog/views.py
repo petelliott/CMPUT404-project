@@ -176,12 +176,38 @@ def viewpic(request,file_name):
     with open(polarbear.settings.MEDIA_ROOT+file_name, "rb") as f:
         return HttpResponse(f.read(), content_type=post.content_type)
 
+def nodeToPost(n):
+    #author, image
+
+    # Cheap hack until everyone has proper APIs
+    if(n.service == "https://spongebook-develop.herokuapp.com/api"):
+        json_resp = requests.get(n.service+"/post/").json()
+    elif(n.service == "https://cloud-align-server.herokuapp.com"):
+        json_resp = requests.get(n.service+"/posts", headers={"Authorization":"Token d319c1aa88b6bf314faee4179b3a817ecbb9516d"}).json()
+    else:    
+        json_resp = requests.get(n.service+"/posts").json()['posts']
+        
+    #author = getPostAuthor()
+    #posts = models.Post(date="2020-03-19T22:44:50.977847Z",title="Hello World", content="Testing", content_type ="text/plain", 
+    # image="", privacy=4)
+
+    return json_resp#[posts]
+
 def getPublicPosts():
-    node = 'https://cmput404w20t06.herokuapp.com/api'
-    api = '/posts'
-    json_resp = requests.get(node+api).json()['posts']
-    
-    return json_resp
+    #node = 'https://cmput404w20t06.herokuapp.com/api'
+    #api = '/posts'
+    #json_resp = requests.get(node+api).json()['posts']
+
+    nodes = users.models.Node.allNodes()
+
+    allPosts = []
+
+    for n in nodes:
+
+        posts = nodeToPost(n)
+        allPosts += posts
+        #return [s.service]
+    return allPosts
 
 def allposts(request):
     
