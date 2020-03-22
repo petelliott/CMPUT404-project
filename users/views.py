@@ -175,14 +175,21 @@ def extFriends(request, author_id):
     '''
     This function is used to render the friends list of a remote Author
     '''
+
+    friends = []
     author_json = requests.get(unquote(author_id)).json()
+
+    for f in author_json['friends']:
+        fUser = auth.models.User(username=f['displayName'])
+        fAuthor = models.Author(id=f['id'] ,user = fUser)
+        friends.append(fAuthor)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
 
     return render(request, "users/friends.html",
                         {"author": author,
-                        "friends": author_json['friends']})
+                        "friends": friends})
 
 def friends(request, author_id):
     '''
@@ -205,7 +212,14 @@ def extFollowing(request, author_id):
     '''
     This function is used to render the following list of a remote Author
     '''
+
+    following = []
     author_json = requests.get(unquote(author_id)).json()
+
+    for f in author_json['friends']:
+        fUser = auth.models.User(username=f['displayName'])
+        fAuthor = models.Author(id=f['id'] ,user = fUser)
+        following.append(fAuthor)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
@@ -213,7 +227,7 @@ def extFollowing(request, author_id):
     return render(request, "users/following.html",
                         {"author": author,
                         #TODO: Change this to get following instead of just friends
-                        "following": author_json['friends']})
+                        "following": following})
 
 def following(request, author_id):
     '''
@@ -234,7 +248,14 @@ def extFollowers(request, author_id):
     '''
     This function is used to render the followers list of a remote Author
     '''
+
+    followers = []
     author_json = requests.get(unquote(author_id)).json()
+
+    for f in author_json['friends']:
+        fUser = auth.models.User(username=f['displayName'])
+        fAuthor = models.Author(id=f['id'] ,user = fUser)
+        followers.append(fAuthor)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
@@ -242,7 +263,7 @@ def extFollowers(request, author_id):
     return render(request, "users/followers.html",
                         {"author": author,
                         #TODO: Change this to get followers instead of just friends
-                        "followers": author_json['friends']})
+                        "followers": followers})
 
 def followers(request, author_id):
     '''

@@ -30,7 +30,7 @@
             
             <ul>
             {% for f in friends %}
-                <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.displayName}}</a></li>
+                <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.user.username }}</a></li>
             {% endfor %}
             </ul>
             
