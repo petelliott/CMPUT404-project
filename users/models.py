@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
+import requests
 
 class Author(models.Model):
     #TODO: this is where we will put friends and stuff
@@ -41,6 +42,8 @@ class Author(models.Model):
     def get_following(self):
         return self.friends.all()
 
+    #TODO: We need this function to also get POSTs from remote friends
+    # Currently only gets post from local friends
     def friends_posts(self):
         fs = self.get_friends()
         if not fs.exists():

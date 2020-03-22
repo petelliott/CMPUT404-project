@@ -4,7 +4,6 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/friends.css'%}">{% endblock %}
 {% block content %}
 
-<p style="color:red;">Debugging Info:<br>{{test}}</p>
 <div class="friends-body">
     <div class="navigation">
         <button class="active" onclick="window.location.href = '{% url 'followers' author.pk|urlencode:""  %}';">Followers</button>

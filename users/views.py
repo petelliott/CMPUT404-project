@@ -102,6 +102,9 @@ def getExtAuthorPosts(author_origin):
     return posts
 
 def extProfile(request, author_id):
+    '''
+    This function is used to render the profile of a remote Author from another server
+    '''
     #TODO: Currently no code for handeling following and unfollowing Authors from other servers
     author_json = requests.get(unquote(author_id)).json()
     posts = getExtAuthorPosts(author_id)
@@ -118,10 +121,12 @@ def extProfile(request, author_id):
                     #TODO: Change this to not just get friends
                     "followers": author_json['friends'],
                     "following": author_json['friends'],
-                    "friends": author_json['friends'],
-                    "test":posts})
+                    "friends": author_json['friends']})
 
 def localProfile(request, author_id):
+    '''
+    This function is used to render the profile of a local Author
+    '''
     author = get_object_or_404(models.Author, pk=author_id)
     you = models.Author.from_user(request.user)
 
@@ -157,12 +162,19 @@ def localProfile(request, author_id):
                        "form": form})
 
 def profile(request, author_id):
+    '''
+    If the author_id is a number, it is a local post
+    Call extProfile() if the author_id is the URI of a post located on another server
+    '''
     if(author_id.isdigit()):
         return localProfile(request, author_id)
     else:
         return extProfile(request, author_id)
     
 def extFriends(request, author_id):
+    '''
+    This function is used to render the friends list of a remote Author
+    '''
     author_json = requests.get(unquote(author_id)).json()
 
     user = auth.models.User(username=author_json['displayName'])
@@ -170,10 +182,13 @@ def extFriends(request, author_id):
 
     return render(request, "users/friends.html",
                         {"author": author,
-                        "friends": author_json['friends'],
-                        "test":author_json['friends']})
+                        "friends": author_json['friends']})
 
 def friends(request, author_id):
+    '''
+    If the author_id is a number, it is a local post
+    Call extFriends() if the author_id is the URI of a post located on another server
+    '''
     if(author_id.isdigit()):
         author = get_object_or_404(models.Author, pk=author_id)
         you = models.Author.from_user(request.user)
@@ -187,6 +202,9 @@ def friends(request, author_id):
     
 
 def extFollowing(request, author_id):
+    '''
+    This function is used to render the following list of a remote Author
+    '''
     author_json = requests.get(unquote(author_id)).json()
 
     user = auth.models.User(username=author_json['displayName'])
@@ -195,10 +213,13 @@ def extFollowing(request, author_id):
     return render(request, "users/following.html",
                         {"author": author,
                         #TODO: Change this to get following instead of just friends
-                        "following": author_json['friends'],
-                        "test":author_json['friends']})
+                        "following": author_json['friends']})
 
 def following(request, author_id):
+    '''
+    If the author_id is a number, it is a local post
+    Call extFollowing() if the author_id is the URI of a post located on another server
+    '''
     if(author_id.isdigit()):
         author = get_object_or_404(models.Author, pk=author_id)
         you = models.Author.from_user(request.user)
@@ -210,6 +231,9 @@ def following(request, author_id):
         return extFollowing(request, author_id)
 
 def extFollowers(request, author_id):
+    '''
+    This function is used to render the followers list of a remote Author
+    '''
     author_json = requests.get(unquote(author_id)).json()
 
     user = auth.models.User(username=author_json['displayName'])
@@ -218,10 +242,13 @@ def extFollowers(request, author_id):
     return render(request, "users/followers.html",
                         {"author": author,
                         #TODO: Change this to get followers instead of just friends
-                        "followers": author_json['friends'],
-                        "test":author_json['friends']})
+                        "followers": author_json['friends']})
 
 def followers(request, author_id):
+    '''
+    If the author_id is a number, it is a local post
+    Call extFollowers() if the author_id is the URI of a post located on another server
+    '''
     if(author_id.isdigit()):
         author = get_object_or_404(models.Author, pk=author_id)
         you = models.Author.from_user(request.user)

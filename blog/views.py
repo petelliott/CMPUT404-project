@@ -140,16 +140,16 @@ def delete(request, post_id):
     return redirect('root')
 
 def viewextpost(request, post_id):
-    
     '''
-    if not post.viewable_by(request.user):
-        raise PermissionDenied
+    This function will renders the view post page for remote posts
+    TODO: Don't think images are working properly. Should check this and fix if it doesn't work
     '''
 
     p = requests.get(unquote(post_id)).json()
 
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
+    # TODO: We may need to standardize the date format somehow
     post = models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType'])
 
     image_path = ''
@@ -169,10 +169,12 @@ def viewextpost(request, post_id):
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
                    "content": content,
-                   "image":  image_path,
-                   "test": p}) 
+                   "image":  image_path}) 
 
 def viewlocalpost(request, post_id):
+    '''
+    This function will renders the view post page for local posts
+    '''
     post = get_object_or_404(models.Post, pk=post_id)
     if not post.viewable_by(request.user):
         raise PermissionDenied
@@ -198,6 +200,10 @@ def viewlocalpost(request, post_id):
                    "image":  image_path}) 
 
 def viewpost(request, post_id):
+    '''
+    If the post id is a number, it is a local post
+    Call viewextpost() if the post id is the URI of a post located on another server
+    '''
     if(post_id.isdigit()):
         return viewlocalpost(request, post_id)
     else:
@@ -215,26 +221,26 @@ def viewpic(request,file_name):
         return HttpResponse(f.read(), content_type=post.content_type)
 
 def nodeToPost(n):
+    '''
+    Given a Node, this function will return a list of all public posts for that node
+    '''
     posts = []
 
     # Cheap hack until everyone has proper APIs
-    if(n.service == "https://spongebook-develop.herokuapp.com/api"):
-        json_resp = requests.get(n.service+"/post/").json()
-
-        for p in json_resp:
-            post_user = auth.models.User(username=p['author'])
-            post_author = models.Author(id=p['author'] ,user = post_user)
-            posts.append(models.Post(id=p['id'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
-
-    elif(n.service == "https://cloud-align-server.herokuapp.com"):
+    if(n.service == "https://cloud-align-server.herokuapp.com"):
+        # This team's API seems like it's not working right now
+        # Leave this in depending on if they get their API fixed before the demo or not
+        pass
+        '''
         json_resp = requests.get(n.service+"/posts", headers={"Authorization":"Token d319c1aa88b6bf314faee4179b3a817ecbb9516d"}).json()
 
         for p in json_resp:
             post_user = auth.models.User(username=p['author_data']['displayName'])
             post_author = models.Author(id=p['author'] ,user = post_user)
             posts.append(models.Post(id=p['id'], date=p['publish'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
-
+        '''
     else:    
+    
         json_resp = requests.get(n.service+"/posts").json()['posts']
 
         for p in json_resp:
@@ -245,9 +251,9 @@ def nodeToPost(n):
     return posts
 
 def getPublicPosts():
-    #node = 'https://cmput404w20t06.herokuapp.com/api'
-    #api = '/posts'
-    #json_resp = requests.get(node+api).json()['posts']
+    '''
+    This function will return a list of all public posts from all nodes
+    '''
 
     nodes = users.models.Node.allNodes()
     allPosts = []
@@ -260,11 +266,19 @@ def getPublicPosts():
     return allPosts
 
 def allposts(request):
-    
+    '''
+    This function will get a concatenated list of all local and remote post
+    the homepage will be rendered with this list of posts
+    '''
+    extPosts = getPublicPosts()
+    localPosts = list(models.Post.public())
+
+    #TODO: Sort these posts by date
+    sortedPosts = extPosts+localPosts
+
     return render(request, "blog/postlist.html",
-                  {"posts": models.Post.public(),
-                   "title": "Public Posts",
-                   "test": getPublicPosts()})
+                  {"posts": sortedPosts,
+                   "title": "Public Posts"})
 
 def friends(request):
     author = users.models.Author.from_user(request.user)
