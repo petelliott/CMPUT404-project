@@ -4,12 +4,12 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/friends.css'%}">{% endblock %}
 {% block content %}
 
-
+<p style="color:red;">Debugging Info:<br>{{test}}</p>
 <div class="friends-body">
     <div class="navigation">
-        <button onclick="window.location.href = '{% url 'followers' author.pk %}';">Followers</button>
-        <button onclick="window.location.href = '{% url 'following' author.pk %}';">Following</button>
-        <button class="active" onclick="window.location.href = '{% url 'friends' author.pk %}';">Friends</button>
+        <button onclick="window.location.href = '{% url 'followers' author.pk|urlencode:"" %}';">Followers</button>
+        <button onclick="window.location.href = '{% url 'following' author.pk|urlencode:"" %}';">Following</button>
+        <button class="active" onclick="window.location.href = '{% url 'friends' author.pk|urlencode:"" %}';">Friends</button>
     </div>
 
     <div class="content">
@@ -18,7 +18,7 @@
             {% if author and author.user == user and freqs|length  > 0 %}
                 {% for freq in freqs %}
                 <li>
-                    <form action="{% url 'profile' freq.pk %}" method="post">
+                    <form action="{% url 'profile' freq.pk|urlencode:"" %}" method="post">
                         {% csrf_token %}
                         <label>{{ freq.user.username }}</label>
                         <button name="action" type="submit" value="accept-request">Accept</button>
@@ -31,7 +31,7 @@
             
             <ul>
             {% for f in friends %}
-                <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
+                <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.displayName}}</a></li>
             {% endfor %}
             </ul>
             

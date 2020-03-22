@@ -86,7 +86,7 @@ def logout(request):
             return redirect("login")
     return redirect("login")
 
-def getExtPosts(author_origin):
+def getExtAuthorPosts(author_origin):
     '''
     Given the externalID of a Author. This function will return a lists of all Public posts for that Author
     '''
@@ -96,26 +96,26 @@ def getExtPosts(author_origin):
     for p in posts_json:
         post_user = auth.models.User(username=p['author']['displayName'])
 
-        # TODO: currently using place holder ids
         post_author = models.Author(id=p['author']['id'] ,user = post_user)
         posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
         
     return posts
 
 def extProfile(request, author_id):
-
+    #TODO: Currently no code for handeling following and unfollowing Authors from other servers
     author_json = requests.get(unquote(author_id)).json()
-    posts = getExtPosts(author_id)
+    posts = getExtAuthorPosts(author_id)
 
     user = auth.models.User(username=author_json['displayName'])
-    author = models.Author(id=1 ,user = user)
+    author = models.Author(id=author_json['id'] ,user = user)
 
     you = models.Author.from_user(request.user)
 
     return render(request, "users/profile.html",
                     {"author": author,
-                    "follows": [],
+                    "follows": False,# TODO: Change this to reflect following or not
                     "posts": posts,
+                    #TODO: Change this to not just get friends
                     "followers": author_json['friends'],
                     "following": author_json['friends'],
                     "friends": author_json['friends'],
@@ -162,32 +162,76 @@ def profile(request, author_id):
     else:
         return extProfile(request, author_id)
     
+def extFriends(request, author_id):
+    author_json = requests.get(unquote(author_id)).json()
 
-def friends(request, author_id):
-    author = get_object_or_404(models.Author, pk=author_id)
-    you = models.Author.from_user(request.user)
+    user = auth.models.User(username=author_json['displayName'])
+    author = models.Author(id=author_json['id'] ,user = user)
 
     return render(request, "users/friends.html",
-                    {"author": author,
-                     "friends": author.get_friends(),
-                     "freqs": you.get_friend_requests()})
+                        {"author": author,
+                        "friends": author_json['friends'],
+                        "test":author_json['friends']})
 
-def following(request, author_id):
-    author = get_object_or_404(models.Author, pk=author_id)
-    you = models.Author.from_user(request.user)
+def friends(request, author_id):
+    if(author_id.isdigit()):
+        author = get_object_or_404(models.Author, pk=author_id)
+        you = models.Author.from_user(request.user)
+
+        return render(request, "users/friends.html",
+                        {"author": author,
+                        "friends": author.get_friends(),
+                        "freqs": you.get_friend_requests()})
+    else:
+        return extFriends(request, author_id)
+    
+
+def extFollowing(request, author_id):
+    author_json = requests.get(unquote(author_id)).json()
+
+    user = auth.models.User(username=author_json['displayName'])
+    author = models.Author(id=author_json['id'] ,user = user)
 
     return render(request, "users/following.html",
-                    {"author": author,
-                     "following": author.get_following()})
+                        {"author": author,
+                        #TODO: Change this to get following instead of just friends
+                        "following": author_json['friends'],
+                        "test":author_json['friends']})
 
-def followers(request, author_id):
-    author = get_object_or_404(models.Author, pk=author_id)
-    you = models.Author.from_user(request.user)
+def following(request, author_id):
+    if(author_id.isdigit()):
+        author = get_object_or_404(models.Author, pk=author_id)
+        you = models.Author.from_user(request.user)
+
+        return render(request, "users/following.html",
+                        {"author": author,
+                        "following": author.get_following()})
+    else:
+        return extFollowing(request, author_id)
+
+def extFollowers(request, author_id):
+    author_json = requests.get(unquote(author_id)).json()
+
+    user = auth.models.User(username=author_json['displayName'])
+    author = models.Author(id=author_json['id'] ,user = user)
 
     return render(request, "users/followers.html",
-                    {"author": author,
-                     "followers": author.get_followers()})
+                        {"author": author,
+                        #TODO: Change this to get followers instead of just friends
+                        "followers": author_json['friends'],
+                        "test":author_json['friends']})
 
+def followers(request, author_id):
+    if(author_id.isdigit()):
+        author = get_object_or_404(models.Author, pk=author_id)
+        you = models.Author.from_user(request.user)
+
+        return render(request, "users/followers.html",
+                        {"author": author,
+                        "followers": author.get_followers()})
+    else:
+        return extFollowers(request, author_id)
+        
 @require_POST
 def editProfile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
