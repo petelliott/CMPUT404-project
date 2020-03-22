@@ -4,19 +4,18 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'users/friends.css'%}">{% endblock %}
 {% block content %}
 
-
 <div class="friends-body">
     <div class="navigation">
-        <button onclick="window.location.href = '{% url 'followers' author.pk %}';">Followers</button>
-        <button class="active" onclick="window.location.href = '{% url 'following' author.pk %}';">Following</button>
-        <button onclick="window.location.href = '{% url 'friends' author.pk %}';">Friends</button>
+        <button onclick="window.location.href = '{% url 'followers' author.pk|urlencode:"" %}';">Followers</button>
+        <button class="active" onclick="window.location.href = '{% url 'following' author.pk|urlencode:"" %}';">Following</button>
+        <button onclick="window.location.href = '{% url 'friends' author.pk|urlencode:"" %}';">Friends</button>
     </div>
 
     <div class="content">
         <div class="friends">            
             <ul>
             {% for f in following %}
-                <li><a href={% url 'profile' f.pk %}>{{f.user.username}}</a></li>
+                <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.user.username }}</a></li>
             {% endfor %}
             </ul>
         </div>

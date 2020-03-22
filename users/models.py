@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
+import requests
 
 class Author(models.Model):
     #TODO: this is where we will put friends and stuff
@@ -11,6 +12,7 @@ class Author(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='author')
     create_time = models.DateTimeField(auto_now = True)
+    github = models.TextField(null = True) 
 
     def follow(self, other):
         self.friends.add(other)
@@ -40,6 +42,8 @@ class Author(models.Model):
     def get_following(self):
         return self.friends.all()
 
+    #TODO: We need this function to also get POSTs from remote friends
+    # Currently only gets post from local friends
     def friends_posts(self):
         fs = self.get_friends()
         if not fs.exists():
@@ -109,6 +113,7 @@ class Author(models.Model):
 
 class Node(models.Model):
     enabled = models.BooleanField(default=True)
+    service = models.URLField(max_length=250, null=True)
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='node')
@@ -132,3 +137,7 @@ class Node(models.Model):
             return user.node
         except cls.DoesNotExist:
             return None
+        
+    @classmethod
+    def allNodes(cls):
+        return cls.objects.all()

@@ -12,7 +12,9 @@ from django.views.decorators.http import require_POST
 import commonmark
 import polarbear.settings 
 import magic
-
+import requests
+import json
+from urllib.parse import unquote
 
 class PostForm(forms.Form):
     title = forms.CharField()
@@ -137,8 +139,42 @@ def delete(request, post_id):
     post.delete()
     return redirect('root')
 
+def viewextpost(request, post_id):
+    '''
+    This function will renders the view post page for remote posts
+    TODO: Don't think images are working properly. Should check this and fix if it doesn't work
+    '''
 
-def viewpost(request, post_id):
+    p = requests.get(unquote(post_id)).json()
+
+    post_user = auth.models.User(username=p['author']['displayName'])
+    post_author = models.Author(id=p['author']['id'] ,user = post_user)
+    # TODO: We may need to standardize the date format somehow
+    post = models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType'])
+
+    image_path = ''
+    content = ''
+
+    if post.content_type == "text/markdown":
+        content = commonmark.commonmark(post.content)
+    elif post.content_type == "text/plain":
+        content = post.content
+    else:
+        if post.image != None:
+            image = post.image.__str__()
+            print("image: " + post.image.__str__())
+            image_path = polarbear.settings.MEDIA_URL+image
+            print(image_path)
+
+    return render(request, "blog/viewpost.html",
+                  {"post": post, "edit": False,
+                   "content": content,
+                   "image":  image_path}) 
+
+def viewlocalpost(request, post_id):
+    '''
+    This function will renders the view post page for local posts
+    '''
     post = get_object_or_404(models.Post, pk=post_id)
     if not post.viewable_by(request.user):
         raise PermissionDenied
@@ -163,6 +199,16 @@ def viewpost(request, post_id):
                    "content": content,
                    "image":  image_path}) 
 
+def viewpost(request, post_id):
+    '''
+    If the post id is a number, it is a local post
+    Call viewextpost() if the post id is the URI of a post located on another server
+    '''
+    if(post_id.isdigit()):
+        return viewlocalpost(request, post_id)
+    else:
+        return viewextpost(request, post_id)
+
 def viewpic(request,file_name):
     file_name = "post_image/"+file_name
     # print(file_name)
@@ -174,10 +220,64 @@ def viewpic(request,file_name):
     with open(polarbear.settings.MEDIA_ROOT+file_name, "rb") as f:
         return HttpResponse(f.read(), content_type=post.content_type)
 
+def nodeToPost(n):
+    '''
+    Given a Node, this function will return a list of all public posts for that node
+    '''
+    posts = []
+
+    # Cheap hack until everyone has proper APIs
+    if(n.service == "https://cloud-align-server.herokuapp.com"):
+        # This team's API seems like it's not working right now
+        # Leave this in depending on if they get their API fixed before the demo or not
+        pass
+        '''
+        json_resp = requests.get(n.service+"/posts", headers={"Authorization":"Token d319c1aa88b6bf314faee4179b3a817ecbb9516d"}).json()
+
+        for p in json_resp:
+            post_user = auth.models.User(username=p['author_data']['displayName'])
+            post_author = models.Author(id=p['author'] ,user = post_user)
+            posts.append(models.Post(id=p['id'], date=p['publish'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
+        '''
+    else:    
+    
+        json_resp = requests.get(n.service+"/posts").json()['posts']
+
+        for p in json_resp:
+            post_user = auth.models.User(username=p['author']['displayName'])
+            post_author = models.Author(id=p['author']['id'] ,user = post_user)
+            posts.append(models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))    
+
+    return posts
+
+def getPublicPosts():
+    '''
+    This function will return a list of all public posts from all nodes
+    '''
+
+    nodes = users.models.Node.allNodes()
+    allPosts = []
+
+    for n in nodes:
+        #if n.id == 2:
+        posts = nodeToPost(n)
+        allPosts += posts
+        #return [s.service]
+    return allPosts
 
 def allposts(request):
+    '''
+    This function will get a concatenated list of all local and remote post
+    the homepage will be rendered with this list of posts
+    '''
+    extPosts = getPublicPosts()
+    localPosts = list(models.Post.public())
+
+    #TODO: Sort these posts by date
+    sortedPosts = extPosts+localPosts
+
     return render(request, "blog/postlist.html",
-                  {"posts": models.Post.public(),
+                  {"posts": sortedPosts,
                    "title": "Public Posts"})
 
 def friends(request):

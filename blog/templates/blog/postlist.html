@@ -14,15 +14,16 @@
       <button onclick="window.location.href = '{% url 'friendposts' %}';">Friends' Posts</button>
     {% endif %}
   </div>
-
+ 
   <div class="content">
       <div class="posts">            
           <ul>
             {% for post in posts %}
             <li>
-              <a href="{% url 'viewpost' post.pk %}">{{ post.title }}</a>
+              <a href="{% url 'viewpost' post.pk|urlencode:"" %}">{{ post.title }}</a>
               --
-              <a href="{% url 'profile' post.author.pk %}">{{ post.author.user.username }}</a>
+              <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
+              <span>{{ post.date }}</span>
             </li>
             {% endfor %}
           </ul>
