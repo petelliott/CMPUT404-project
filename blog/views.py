@@ -166,7 +166,6 @@ def viewextpost(request, post_id):
             image_path = polarbear.settings.MEDIA_URL+image
             print(image_path)
 
-    #post = get_object_or_404(models.Post, pk=1)
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
                    "content": content,

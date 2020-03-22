@@ -87,17 +87,18 @@ def logout(request):
     return redirect("login")
 
 def getExtPosts(author_origin):
+    '''
+    Given the externalID of a Author. This function will return a lists of all Public posts for that Author
+    '''
     posts = []
     posts_json = requests.get(unquote(author_origin)+"/posts").json()['posts']
+    
     for p in posts_json:
         post_user = auth.models.User(username=p['author']['displayName'])
-        '''
-        post_author = models.Author(id=p['author']['id'] ,user = post_user)
-        posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
-        '''
+
         # TODO: currently using place holder ids
         post_author = models.Author(id=p['author']['id'] ,user = post_user)
-        posts.append(blog.models.Post(id=1, date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
+        posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
         
     return posts
 
