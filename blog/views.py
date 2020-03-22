@@ -14,7 +14,7 @@ import polarbear.settings
 import magic
 import requests
 import json
-
+from urllib.parse import unquote
 
 class PostForm(forms.Form):
     title = forms.CharField()
@@ -139,8 +139,41 @@ def delete(request, post_id):
     post.delete()
     return redirect('root')
 
+def viewextpost(request, post_id):
+    
+    '''
+    if not post.viewable_by(request.user):
+        raise PermissionDenied
+    '''
 
-def viewpost(request, post_id):
+    p = requests.get(unquote(post_id)).json()
+
+    post_user = auth.models.User(username=p['author']['displayName'])
+    post_author = models.Author(id=p['author']['id'] ,user = post_user)
+    post = models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType'])
+
+    image_path = ''
+    content = ''
+
+    if post.content_type == "text/markdown":
+        content = commonmark.commonmark(post.content)
+    elif post.content_type == "text/plain":
+        content = post.content
+    else:
+        if post.image != None:
+            image = post.image.__str__()
+            print("image: " + post.image.__str__())
+            image_path = polarbear.settings.MEDIA_URL+image
+            print(image_path)
+
+    #post = get_object_or_404(models.Post, pk=1)
+    return render(request, "blog/viewpost.html",
+                  {"post": post, "edit": False,
+                   "content": content,
+                   "image":  image_path,
+                   "test": p}) 
+
+def viewlocalpost(request, post_id):
     post = get_object_or_404(models.Post, pk=post_id)
     if not post.viewable_by(request.user):
         raise PermissionDenied
@@ -164,6 +197,12 @@ def viewpost(request, post_id):
                   {"post": post, "edit": author == post.author,
                    "content": content,
                    "image":  image_path}) 
+
+def viewpost(request, post_id):
+    if(post_id.isdigit()):
+        return viewlocalpost(request, post_id)
+    else:
+        return viewextpost(request, post_id)
 
 def viewpic(request,file_name):
     file_name = "post_image/"+file_name
