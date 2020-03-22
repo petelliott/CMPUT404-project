@@ -101,10 +101,10 @@ def getExtPosts(author_origin):
         
     return posts
 
-def extProfile(request, author_origin):
+def extProfile(request, author_id):
 
-    author_json = requests.get(unquote(author_origin)).json()
-    posts = getExtPosts(author_origin)
+    author_json = requests.get(unquote(author_id)).json()
+    posts = getExtPosts(author_id)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=1 ,user = user)
@@ -114,18 +114,14 @@ def extProfile(request, author_origin):
     return render(request, "users/profile.html",
                     {"author": author,
                     "follows": [],
-                    "posts": [],
+                    "posts": posts,
                     "followers": author_json['friends'],
                     "following": author_json['friends'],
                     "friends": author_json['friends'],
                     "test":posts})
 
-
-def profile(request, author_id):
- 
+def localProfile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
-
-    
     you = models.Author.from_user(request.user)
 
     if you is None:
@@ -158,6 +154,13 @@ def profile(request, author_id):
                        "following": author.get_following(),
                        "friends": author.get_friends(),
                        "form": form})
+
+def profile(request, author_id):
+    if(author_id.isdigit()):
+        return localProfile(request, author_id)
+    else:
+        return extProfile(request, author_id)
+    
 
 def friends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)

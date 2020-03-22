@@ -27,7 +27,7 @@
               {% endcomment %}
               <a href="{% url 'viewpost' 4 %}">{{ post.title }}</a>
               --
-              <a href="{% url 'external-profile' post.author.id|urlencode:"" %}">{{ post.author.user.username }}</a>
+              <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
             </li>
             {% endfor %}
             {% for post in posts %}
