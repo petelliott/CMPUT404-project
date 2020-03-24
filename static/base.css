@@ -43,12 +43,11 @@ body {
     font-family: Verdana;
 }
 
-.login_main_block{
+.login_signup_main_block{
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 350px;
-    height: 266px;
+    width: 25%;
     line-height: 10px;
 
 
@@ -103,22 +102,6 @@ body {
 
 .signup_header{
     font-family: Verdana;
-}
-
-.signup_main_block{
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 390px;
-    height: 336px;
-    line-height: 10px;
-
-
-    border: 1px solid grey;
-    border-radius: 5px;
-
-    font-size: 14px;
-    background: #ffffff;
 }
 
 .signup_btn{

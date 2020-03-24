@@ -10,7 +10,7 @@
 </script>
 {% endif %}
 <h3 align='center' class = 'login_header'> Log in to PolarBear </h3>
-<div class = "login_main_block">
+<div class = "login_signup_main_block">
   <form action="{% url 'login' %}" method="post" class="loginsignupform" >
     {% csrf_token %}
     {{ form }}
