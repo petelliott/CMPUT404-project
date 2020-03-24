@@ -21,7 +21,7 @@
 {% endif %}
 {% if not sucess %}
 <h3 align='center' class= 'signup_header'> Create Your Account </h3>
-<div class = "signup_main_block">
+<div class = "login_signup_main_block">
 <form action="{% url 'signup' %}" method="post" class="loginsignupform">
   {% csrf_token %}
     {{ form }}
