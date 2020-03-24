@@ -10,15 +10,16 @@ from blog.models import Privacy, Post
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 import commonmark
-import polarbear.settings 
+import polarbear.settings
 import magic
 import requests
 import json
 from urllib.parse import unquote
+import dateutil.parser
 
 class PostForm(forms.Form):
     title = forms.CharField()
-    
+
     privacy = forms.IntegerField(widget=forms.Select(choices=(
         (Privacy.PUBLIC, "Public"),
         (Privacy.PRIVATE, "Private"),
@@ -43,9 +44,9 @@ class PostForm(forms.Form):
                 "Image: "+self.image,
                 "content_type"+self.content_type]
         return '\n'.join(post)
-    
-    
-    
+
+
+
 # Date format standarlizer,
 # converting 'YYYY-MM-DDThh:mm:ss.497350-06:00' to 'YYYY-MM-DD'
 def date_format_converter(date):
@@ -125,7 +126,7 @@ def edit(request, post_id):
                 image = post.image.__str__()
                 mime  = magic.Magic(mime=True)
                 # This function will return a mime type of this file
-                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)                
+                post.content_type = mime.from_file(polarbear.settings.MEDIA_ROOT+image)
 
             post.save()   # Update our content_type if there is an image
             return redirect("viewpost", post_id=post.pk)
@@ -161,13 +162,13 @@ def viewextpost(request, post_id):
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
     post_date = date_format_converter(p['published'])
-    
+
     # TODO: We may need to standardize the date format somehow
-    post = models.Post( id     = p['source'], 
-                        date   = post_date, 
-                        title  = p['title'], 
-                        content= p['content'], 
-                        author = post_author, 
+    post = models.Post( id     = p['source'],
+                        date   = post_date,
+                        title  = p['title'],
+                        content= p['content'],
+                        author = post_author,
                         content_type= p['contentType'])
 
     image_path = ''
@@ -187,7 +188,7 @@ def viewextpost(request, post_id):
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
                    "content": content,
-                   "image":  image_path}) 
+                   "image":  image_path})
 
 def viewlocalpost(request, post_id):
     '''
@@ -215,7 +216,7 @@ def viewlocalpost(request, post_id):
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
                    "content": content,
-                   "image":  image_path}) 
+                   "image":  image_path})
 
 def viewpost(request, post_id):
     '''
@@ -258,27 +259,27 @@ def nodeToPost(n):
         for p in json_resp:
             post_user = auth.models.User(username=p['author_data']['displayName'])
             post_author = models.Author(id=p['author'] ,user = post_user)
-            posts.append(models.Post(id=p['id'], 
-                                     date=p['publish'], 
+            posts.append(models.Post(id=p['id'],
+                                     date=p['publish'],
                                      title=p['title'],
-                                     content=p['content'], 
-                                     author=post_author, 
+                                     content=p['content'],
+                                     author=post_author,
                                      content_type=p['contentType']))
         '''
-        
-    else:    
+
+    else:
         json_resp = requests.get(n.service+"/posts").json()['posts']
         for p in json_resp:
             post_user = auth.models.User(username=p['author']['displayName'])
             post_author = models.Author(id=p['author']['id'] ,user = post_user)
-            post_date = date_format_converter(p['published'])
+            post_date = dateutil.parser.parse(p['published']).date()
             posts.append(models.Post(id=p['source'],
                                      date=post_date,
-                                     title=p['title'], 
+                                     title=p['title'],
                                      content=p['content'],
                                      author=post_author,
-                                     content_type=p['contentType']))    
-            
+                                     content_type=p['contentType']))
+
 
     return posts
 
@@ -311,9 +312,9 @@ def allposts(request):
     for i in localPosts:
         print(i.get_date())
     '''
-    
+
     sortedPosts = (sorted(extPosts+localPosts, key=lambda x: x.get_date(),reverse = True))
-    
+
     return render(request, "blog/postlist.html",
                   {"posts": sortedPosts,
                    "title": "Public Posts"})
