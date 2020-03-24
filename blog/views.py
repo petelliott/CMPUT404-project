@@ -43,6 +43,17 @@ class PostForm(forms.Form):
                 "Image: "+self.image,
                 "content_type"+self.content_type]
         return '\n'.join(post)
+    
+    
+    
+# Date format standarlizer,
+# converting 'YYYY-MM-DDThh:mm:ss.497350-06:00' to 'YYYY-MM-DD'
+def date_format_converter(date):
+    if 'T' in date:
+        post_date = date.split('T')[0]
+    else:
+        post_date = date
+    return post_date
 
 
 
@@ -149,8 +160,15 @@ def viewextpost(request, post_id):
 
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
+    post_date = date_format_converter(p['published'])
+    
     # TODO: We may need to standardize the date format somehow
-    post = models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType'])
+    post = models.Post( id     = p['source'], 
+                        date   = post_date, 
+                        title  = p['title'], 
+                        content= p['content'], 
+                        author = post_author, 
+                        content_type= p['contentType'])
 
     image_path = ''
     content = ''
@@ -220,6 +238,9 @@ def viewpic(request,file_name):
     with open(polarbear.settings.MEDIA_ROOT+file_name, "rb") as f:
         return HttpResponse(f.read(), content_type=post.content_type)
 
+
+
+
 def nodeToPost(n):
     '''
     Given a Node, this function will return a list of all public posts for that node
@@ -237,16 +258,27 @@ def nodeToPost(n):
         for p in json_resp:
             post_user = auth.models.User(username=p['author_data']['displayName'])
             post_author = models.Author(id=p['author'] ,user = post_user)
-            posts.append(models.Post(id=p['id'], date=p['publish'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
+            posts.append(models.Post(id=p['id'], 
+                                     date=p['publish'], 
+                                     title=p['title'],
+                                     content=p['content'], 
+                                     author=post_author, 
+                                     content_type=p['contentType']))
         '''
+        
     else:    
-    
         json_resp = requests.get(n.service+"/posts").json()['posts']
-
         for p in json_resp:
             post_user = auth.models.User(username=p['author']['displayName'])
             post_author = models.Author(id=p['author']['id'] ,user = post_user)
-            posts.append(models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))    
+            post_date = date_format_converter(p['published'])
+            posts.append(models.Post(id=p['source'],
+                                     date=post_date,
+                                     title=p['title'], 
+                                     content=p['content'],
+                                     author=post_author,
+                                     content_type=p['contentType']))    
+            
 
     return posts
 
@@ -271,11 +303,17 @@ def allposts(request):
     the homepage will be rendered with this list of posts
     '''
     extPosts = getPublicPosts()
+    # localPosts Data Format:
+    # YYYY-MM-DD
     localPosts = list(models.Post.public())
 
-    #TODO: Sort these posts by date
-    sortedPosts = extPosts+localPosts
-
+    '''
+    for i in localPosts:
+        print(i.get_date())
+    '''
+    
+    sortedPosts = (sorted(extPosts+localPosts, key=lambda x: x.get_date(),reverse = True))
+    
     return render(request, "blog/postlist.html",
                   {"posts": sortedPosts,
                    "title": "Public Posts"})

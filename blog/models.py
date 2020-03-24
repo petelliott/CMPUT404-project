@@ -41,6 +41,10 @@ class Post(models.Model):
             return False
 
         return False
+    
+    
+    def get_date(self):
+        return self.date
 
     def listable_to(self, user):
         if self.privacy == Privacy.URL_ONLY:
