@@ -100,7 +100,7 @@ def serialize_post(request, post):
         "origin": api_reverse(request, "api_post", post_id=post.pk),
         "description": None, #TODO
         "contentType": post.content_type,
-        "content": post.content, #TODO: images
+        "content": post.content, #TODO: images	
         "author": serialize_author(request, post.author),
         #TODO: comments
         "published": post.date,
