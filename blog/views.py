@@ -156,9 +156,16 @@ def viewextpost(request, post_id):
     This function will renders the view post page for remote posts
     TODO: Don't think images are working properly. Should check this and fix if it doesn't work
     '''
-
-    p = requests.get(unquote(post_id)).json()
-
+    
+    print("post id: ",post_id)
+    print("unquote: ",unquote(post_id))
+    try:
+        p = requests.get(unquote(post_id))
+        if p.status_code == 404:
+            raise Exception("Page Not Found")
+        p = p.json()
+    except Exception as e:
+        print(e)
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
     post_date = date_format_converter(p['published'])
@@ -268,7 +275,11 @@ def nodeToPost(n):
         '''
 
     else:
-        json_resp = requests.get(n.service+"/posts").json()['posts']
+        url = n.service+"/posts"
+        print('url: ',url)
+        json_resp = requests.get(url).json()['posts']
+        print(json_resp)
+
         for p in json_resp:
             post_user = auth.models.User(username=p['author']['displayName'])
             post_author = models.Author(id=p['author']['id'] ,user = post_user)
@@ -283,6 +294,30 @@ def nodeToPost(n):
 
     return posts
 
+
+
+
+def clear():
+    nodes = users.models.Node.allNodes()
+    for n in nodes:
+        n.delete()
+    users.models.User.objects.filter(username='qianyutest3').delete()
+    print('clear successfully')
+    
+    
+# Testing Method
+def init():
+    clear()
+    user = users.models.User(username = 'qianyutest3',
+                             password = 'randompassword')
+    user.save()
+    node = users.models.Node(enabled = True,
+                            service='https://spongebook.herokuapp.com',
+                            user = user)
+    node.save()
+    print('node creates successfully')
+    
+
 def getPublicPosts():
     '''
     This function will return a list of all public posts from all nodes
@@ -290,8 +325,10 @@ def getPublicPosts():
 
     nodes = users.models.Node.allNodes()
     allPosts = []
-
+    init()
+    # print(nodes)
     for n in nodes:
+        print(n.service)
         #if n.id == 2:
         posts = nodeToPost(n)
         allPosts += posts

@@ -13,6 +13,9 @@ from django.db import IntegrityError
 import requests
 import json
 from urllib.parse import unquote
+from api.views import serialize_author,api_reverse
+from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 def toast(request):
     messages.success(request,"Sign up successully but please wait for approve")
@@ -108,20 +111,56 @@ def extProfile(request, author_id):
     #TODO: Currently no code for handeling following and unfollowing Authors from other servers
     author_json = requests.get(unquote(author_id)).json()
     posts = getExtAuthorPosts(author_id)
-
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
-
     you = models.Author.from_user(request.user)
 
+    if request.method == 'POST':
+        you = models.Author.from_user(request.user)
+        if request.POST["action"] == "follow":
+            # you.follow(author)
+            try:
+                models.extAuthor.objects.get(url = author_json['id'])
+            except ObjectDoesNotExist:
+                models.extAuthor.objects.create(url = author_json['id'])
+            ext_friend = models.extAuthor.objects.get(url = author_json['id'])
+            you.follow_ext(ext_friend)
+            
+            # ----- friend request format -----
+            friend_request = {}
+            you_json = serialize_author(request,you)
+            friend_request["query"] = "friendrequest"
+            friend_request["author"] = you_json
+            friend_request["friend"] = author_json
+            # ----- friend request format -----
+            target_url = author_json['host']+'friendrequest'
+            requests.post( target_url, data=friend_request)
+
+        elif request.POST["action"] == "un-follow":
+            try:
+                models.extAuthor.objects.get(url = author_json['id'])
+            except ObjectDoesNotExist:
+                models.extAuthor.objects.create(url = author_json['id'])
+            ext_friend = models.extAuthor.objects.get(url = author_json['id'])
+            you.unfollow_ext(ext_friend)
+
+        elif request.POST["action"] == "accept-request":
+            pass
+            # return redirect('profile', you.pk)
+        elif request.POST["action"] == "reject-request":
+            pass 
+            # return redirect('profile', you.pk)
+    elif request.method == 'GET':
+        pass
+    
     return render(request, "users/profile.html",
-                    {"author": author,
-                    "follows": False,# TODO: Change this to reflect following or not
-                    "posts": posts,
-                    #TODO: Change this to not just get friends
-                    "followers": author_json['friends'],
-                    "following": author_json['friends'],
-                    "friends": author_json['friends']})
+                        {"author": author,
+                        "follows": you.follows(author),
+                        "posts": posts,
+                        #TODO: Change this to not just get friends
+                        "followers": author_json['friends'],
+                        "following": author_json['friends'],
+                        "friends": author_json['friends']})
 
 def localProfile(request, author_id):
     '''

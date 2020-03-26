@@ -3,11 +3,22 @@ from django.contrib.auth.models import User
 from functools import reduce
 import requests
 
+
+class extAuthor(models.Model):
+    url = models.URLField(max_length=200,primary_key=True)
+    
+    
+
 class Author(models.Model):
     #TODO: this is where we will put friends and stuff
     number = models.IntegerField() #TODO: delete this
     friends = models.ManyToManyField('self', related_name='followers',
                                      symmetrical=False)
+    
+    # list of <author_id> of remote user
+    ext_friends = models.ManyToManyField(extAuthor, related_name='ext_followers',
+                                         symmetrical=False)
+    
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='author')
@@ -19,30 +30,76 @@ class Author(models.Model):
 
     def unfollow(self, other):
         self.friends.remove(other)
-
+        
+    def follow_ext(self,other):
+        self.ext_friends.add(other)
+    
+    def unfollow_ext(self,other):
+        
+        self.ext_friends.remove(other)
+        
+        
     def follows(self, other):
         try:
-            self.friends.get(id=other.id)
+            if isinstance(other.id,int):
+                self.friends.get(id=other.id)
+            else:
+                self.ext_friends.get(url=other.pk)
             return True
         except Author.DoesNotExist:
             return False
+        except extAuthor.DoesNotExist:
+            return False
 
     def friends_with(self, other):
+        '''
+            Check if A(self) and B(other) are friends.
+            example, A.friends_with(B)
+            TODO: We need this function to also get result if B is a remote user(We may need to standardize the data type)
+        '''
         return self.follows(other) and other.follows(self)
 
     def get_friends(self):
+        '''
+            Get A's all local friends
+            TODO: We need this function to also get A's remote friends(We may need to standardize the data type)
+        '''
         return self.friends.all().intersection(self.followers.all())
-
+    
     def get_friend_requests(self):
+        '''
+            Get A's all local friend requests
+            TODO: We need this function to also get A's friend request from remote user
+        '''
         return self.followers.all().difference(self.friends.all())
 
     def get_followers(self):
+        '''
+            Get A's all local Followers
+            TODO: We need this function to also get A's remote follower(We may need to standardize the data type)
+        '''
         return self.followers.all()
 
     def get_following(self):
+        '''
+            Get A's all local Followings
+            TODO: We need this function to also get A's remote following(combine get_following() and get_ext_following() if possible)
+            (We may need to standardize the data type)
+        Return value:
+            list of author model instances
+        '''
         return self.friends.all()
 
-    #TODO: We need this function to also get POSTs from remote friends
+    def get_ext_ollowing(self):
+        '''
+            Get A's all remote Followings
+            TODO: We need this function to also get A's local following(We may need to standardize the data type)
+        Return value:
+            list of extAuthor model instances(URL)
+        '''
+        return self.ext_friends.all()
+
+    # TODO: We need this function to also get POSTs from remote friends
     # Currently only gets post from local friends
     def friends_posts(self):
         fs = self.get_friends()
