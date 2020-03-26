@@ -4,13 +4,17 @@ from django.urls import reverse
 from blog.util import paginate
 from blog.models import Privacy, Post
 from users.models import Author
+from users import models
 from django.contrib import auth
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 import blog
 import json
 import base64
 import datetime
+import requests
+
 
 
 def http_basic_authenticate(request):
@@ -272,22 +276,81 @@ def author_from_url(host, id):
         author_id = int(id.split('/')[-1])
         return get_object_or_404(Author, pk=author_id)
     else:
-        #TODO add remoteAuthors for part 2
+        author_id = int(id.split('/')[-1])
         assert False
+        
+        
+        
+def local_local_friendrequest(host, data):
+    author_id = int(data["author"]["id"].split('/')[-1])
+    author = get_object_or_404(Author, pk=author_id)
+    fiend_id = int(data["friend"]["id"].split('/')[-1])
+    friend = get_object_or_404(Author, pk=fiend_id)
+    author.follow(friend)
+
+def local_remote_friendrequest(host, data):
+    author_id = int(data["author"]["id"].split('/')[-1])
+    author = get_object_or_404(Author, pk=author_id)
+    try:
+        models.extAuthor.objects.get(url = data["friend"]["id"])
+    except ObjectDoesNotExist:
+        models.extAuthor.objects.create(url = data["friend"]['id'])
+    ext_friend = models.extAuthor.objects.get(url = data["friend"]['id'])
+    author.follow_ext(ext_friend)
+
+def remote_local_friendrequest(host, data):
+    try:
+        models.extAuthor.objects.get(url = data["author"]["id"])
+    except ObjectDoesNotExist:
+        models.extAuthor.objects.create(url = data["author"]['id'])
+    ext_author = models.extAuthor.objects.get(url = data["author"]['id'])
+    friend_id = int(data["friend"]["id"].split('/')[-1])
+    friend = get_object_or_404(Author, pk=friend_id)
+    friend.followed_by_remote(ext_author)
+    
+    '''
+    # ----- friend request format -----
+    you_json = serialize_author(request,you)
+    friend_request = {}
+    friend_request["query"] = "friendrequest"
+    friend_request["author"] = you_json
+    friend_request["friend"] = author_json
+    # ----- friend request format -----
+    target_url = author_json['host']+'friendrequest'
+    requests.post( target_url, data=friend_request)
+    '''
+    
 
 
 @csrf_exempt
 @auth_api
 @require_POST
 def friendrequest(request):
+    '''
+        This function is to let author follow friend,
+        there are 3 different cases:
+        author is a local user and friend is a local user
+        author is a local user and friend is a remote user
+        author is a remote user and friend is a local user
+    '''
     data = json.loads(request.body)
     host = request_host(request)
     try:
-        author = author_from_url(host, data["author"]["id"])
-        friend = author_from_url(host, data["friend"]["id"])
+        author_id = data["author"]["id"]
+        friend_id = data["friend"]["id"]
+        if author_id.startswith(host) and friend_id.startswith(host):
+            local_local_friendrequest(host, data)
+        elif author_id.startswith(host) and not friend_id.startswith(host):
+            local_remote_friendrequest(host, data)
+        elif not author_id.startswith(host) and friend_id.startswith(host):
+            remote_local_friendrequest(host, data)
+        else:
+            # Our server does not handle the relationship between remote user and remote user
+            raise NameError
     except KeyError:
+        return JsonResponse({}, status=404)
+    except NameError:
         return JsonResponse({}, status=400)
-    author.follow(friend)
     return JsonResponse({})
 
 

@@ -17,6 +17,9 @@
             {% for f in followers %}
                 <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.user.username }}</a></li>
             {% endfor %}
+            {% for id,name in ext_follower %}
+                <li><a href={% url 'profile' id|urlencode:"" %}>{{name }}</a></li>
+            {% endfor %}
             </ul>
         </div>
     </div>

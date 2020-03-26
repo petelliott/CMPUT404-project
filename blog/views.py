@@ -325,7 +325,7 @@ def getPublicPosts():
 
     nodes = users.models.Node.allNodes()
     allPosts = []
-    # init()
+    init()
     # print(nodes)
     for n in nodes:
         print(n.service)

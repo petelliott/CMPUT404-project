@@ -7,6 +7,10 @@ import requests
 class extAuthor(models.Model):
     url = models.URLField(max_length=200,primary_key=True)
     
+    def get_following(self):
+        data = requests.get(self.url).json()
+        friends = data['friends']
+        return friends    
     
 
 class Author(models.Model):
@@ -16,7 +20,10 @@ class Author(models.Model):
                                      symmetrical=False)
     
     # list of <author_id> of remote user
-    ext_friends = models.ManyToManyField(extAuthor, related_name='ext_followers',
+    ext_following = models.ManyToManyField(extAuthor, related_name='ext_followers',
+                                         symmetrical=False)
+    
+    ext_follower = models.ManyToManyField(extAuthor,  related_name='ext_followings',
                                          symmetrical=False)
     
     user = models.OneToOneField(User,
@@ -32,11 +39,16 @@ class Author(models.Model):
         self.friends.remove(other)
         
     def follow_ext(self,other):
-        self.ext_friends.add(other)
+        self.ext_following.add(other)
     
     def unfollow_ext(self,other):
+        self.ext_following.remove(other)
         
-        self.ext_friends.remove(other)
+    def follow_by_ext(self,other):
+        self.ext_follower.add(other)
+        
+    def unfollow_by_ext(self,other):
+        self.ext_follower.remove(other)
         
         
     def follows(self, other):
@@ -44,7 +56,7 @@ class Author(models.Model):
             if isinstance(other.id,int):
                 self.friends.get(id=other.id)
             else:
-                self.ext_friends.get(url=other.pk)
+                self.ext_following.get(url=other.pk)
             return True
         except Author.DoesNotExist:
             return False
@@ -90,14 +102,6 @@ class Author(models.Model):
         '''
         return self.friends.all()
 
-    def get_ext_ollowing(self):
-        '''
-            Get A's all remote Followings
-            TODO: We need this function to also get A's local following(We may need to standardize the data type)
-        Return value:
-            list of extAuthor model instances(URL)
-        '''
-        return self.ext_friends.all()
 
     # TODO: We need this function to also get POSTs from remote friends
     # Currently only gets post from local friends
@@ -122,7 +126,40 @@ class Author(models.Model):
             return self.posts.all()
         else:
             return filter( lambda p: p.listable_to(user), self.posts.all())
+        
+        
+    def get_all_following(self):
+        all_following = set()
+        for i in self.friends.all():
+            all_following.add(i.pk)
+        for i in self.ext_following.all():
+            all_following.add(i.url)
+        return all_following
 
+    def get_all_follower(self):
+        all_follower = set()
+        for i in self.get_followers():
+            all_follower.add(i.pk)
+        for i in self.ext_follower.all():
+            all_follower.add(i.url)
+        return all_follower
+
+    def get_all_friend(self):
+        all_following = self.get_all_following()
+        all_follower = self.get_all_follower()
+        return all_following.intersection(all_follower)
+    
+
+    def get_all_remote_following(self):
+        return self.ext_following.all()
+
+    def get_all_remote_follower(self):
+        return self.ext_follower.all()
+
+    def get_all_remote_friend(self):
+        all_following = self.get_all_remote_following()
+        all_follower = self.get_all_remote_follower()
+        return all_following.intersection(all_follower)
     def __str__(self):
         return self.user.get_username()
 
