@@ -12,7 +12,7 @@ class Author(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='author')
     create_time = models.DateTimeField(auto_now = True)
-    github = models.TextField(null = True) 
+    github = models.TextField(null = True)
 
     def follow(self, other):
         self.friends.add(other)
@@ -119,10 +119,10 @@ class Node(models.Model):
                                 related_name='node')
 
     @classmethod
-    def signup(cls, username, password):
+    def signup(cls, username, password, service):
         user = User.objects.create_user(username=username,
                                         password=password)
-        cls.objects.create(user=user)
+        cls.objects.create(user=user, service=service)
 
     @classmethod
     def from_user(cls, user):
@@ -137,7 +137,7 @@ class Node(models.Model):
             return user.node
         except cls.DoesNotExist:
             return None
-        
+
     @classmethod
     def allNodes(cls):
         return cls.objects.all()
