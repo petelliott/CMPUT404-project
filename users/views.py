@@ -145,11 +145,11 @@ def extProfile(request, author_id):
             you.unfollow_ext(ext_friend)
 
         elif request.POST["action"] == "accept-request":
-            pass
-            # return redirect('profile', you.pk)
+            you.follow_ext(author)
+            return redirect('profile', you.pk)
         elif request.POST["action"] == "reject-request":
-            pass 
-            # return redirect('profile', you.pk)
+            you.unfollow_by_ext(author)
+            return redirect('profile', you.pk)
     elif request.method == 'GET':
         pass
     
@@ -229,37 +229,38 @@ def extFriends(request, author_id):
     return render(request, "users/friends.html",
                         {"author": author,
                         "friends": friends})
-    
+
+
 
 def localFriends(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
     you = models.Author.from_user(request.user)
-    local_friends = author.get_all_friend()
     remote_friends = author.get_all_remote_friend()
     remote = []
     for f in remote_friends:
         data = requests.get(f.url).json()
-        print(data)
         remote.append((data['id'], data['displayName']))
 
     return render(request, "users/friends.html",
                     {"author": author,
-                    "friends": local_friends,
+                    "friends": author.get_friends(),
                     "ext_friend": remote,
                     "freqs": you.get_friend_requests()})
                     
                     
     
-
 def friends(request, author_id):
     '''
     If the author_id is a number, it is a local post
     Call extFriends() if the author_id is the URI of a post located on another server
     '''
     if(author_id.isdigit()):
-        return localFriends(request,author_id)
+        return localFriends(request, author_id)
+
     else:
         return extFriends(request, author_id)
+    
+
     
 
 def extFollowing(request, author_id):

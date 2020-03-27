@@ -6,11 +6,10 @@
 
 <div class="friends-body">
     <div class="navigation">
-        <button onclick="window.location.href = '{% url 'followers' author.pk|urlencode:"" %}';">Followers</button>
-        <button onclick="window.location.href = '{% url 'following' author.pk|urlencode:"" %}';">Following</button>
+        <button onclick=" window.location.href = '{% url 'followers' author.pk|urlencode:"" %}'; ">Followers</button>
+        <button onclick=" window.location.href = '{% url 'following' author.pk %}' ; ">Following</button>
         <button class="active" onclick="window.location.href = '{% url 'friends' author.pk|urlencode:"" %}';">Friends</button>
     </div>
-
     <div class="content">
         <div class="friends">            
             <ul>
