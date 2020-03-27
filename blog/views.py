@@ -65,11 +65,9 @@ def post(request):
 
     if request.method == "POST":
         form = PostForm(request.POST,request.FILES)
-        # print("p1")
 
         if form.is_valid():
             author = request.user.author
-            # print("p2")
 
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
@@ -157,8 +155,6 @@ def viewextpost(request, post_id):
     TODO: Don't think images are working properly. Should check this and fix if it doesn't work
     '''
     
-    print("post id: ",post_id)
-    print("unquote: ",unquote(post_id))
     try:
         p = requests.get(unquote(post_id))
         if p.status_code == 404:
@@ -188,9 +184,7 @@ def viewextpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            print("image: " + post.image.__str__())
             image_path = polarbear.settings.MEDIA_URL+image
-            print(image_path)
 
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
@@ -215,9 +209,7 @@ def viewlocalpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            print("image: " + post.image.__str__())
             image_path = polarbear.settings.MEDIA_URL+image
-            print(image_path)
 
 
     return render(request, "blog/viewpost.html",
@@ -237,9 +229,7 @@ def viewpost(request, post_id):
 
 def viewpic(request,file_name):
     file_name = "post_image/"+file_name
-    # print(file_name)
     post = get_object_or_404(models.Post, image=file_name)
-    # print(post.viewable_by(request.user))
     if not post.viewable_by(request.user):
         raise PermissionDenied
 
@@ -276,9 +266,7 @@ def nodeToPost(n):
 
     else:
         url = n.service+"/posts"
-        print('url: ',url)
         json_resp = requests.get(url).json()['posts']
-        print(json_resp)
 
         for p in json_resp:
             post_user = auth.models.User(username=p['author']['displayName'])
@@ -293,29 +281,6 @@ def nodeToPost(n):
 
 
     return posts
-
-
-
-
-def clear():
-    nodes = users.models.Node.allNodes()
-    for n in nodes:
-        n.delete()
-    users.models.User.objects.filter(username='qianyutest3').delete()
-    print('clear successfully')
-    
-    
-# Testing Method
-def init():
-    clear()
-    user = users.models.User(username = 'qianyutest3',
-                             password = 'randompassword')
-    user.save()
-    node = users.models.Node(enabled = True,
-                            service='https://spongebook.herokuapp.com',
-                            user = user)
-    node.save()
-    print('node creates successfully')
     
 
 def getPublicPosts():
@@ -326,9 +291,7 @@ def getPublicPosts():
     nodes = users.models.Node.allNodes()
     allPosts = []
     # init()
-    # print(nodes)
     for n in nodes:
-        print(n.service)
         #if n.id == 2:
         posts = nodeToPost(n)
         allPosts += posts
@@ -344,11 +307,6 @@ def allposts(request):
     # localPosts Data Format:
     # YYYY-MM-DD
     localPosts = list(models.Post.public())
-
-    '''
-    for i in localPosts:
-        print(i.get_date())
-    '''
 
     sortedPosts = (sorted(extPosts+localPosts, key=lambda x: x.get_date(),reverse = True))
 

@@ -189,7 +189,6 @@ def localProfile(request, author_id):
     else:
         form = EditProfileForm(initial={"username": request.user.username})
 
-        print(you.get_friend_requests())
         return render(request, "users/profile.html",
                       {"author": author,
                        "follows": you.follows(author),
@@ -210,6 +209,7 @@ def profile(request, author_id):
     else:
         return extProfile(request, author_id)
     
+
 def extFriends(request, author_id):
     '''
     This function is used to render the friends list of a remote Author
@@ -240,11 +240,18 @@ def localFriends(request, author_id):
     for f in remote_friends:
         data = requests.get(f.url).json()
         remote.append((data['id'], data['displayName']))
+    
+    remote_request = author.get_remote_friend_request()
+    remote_r = []
+    for r in remote_request:
+        data = requests.get(f.url).json()
+        remote_r.append((data['id'], data['displayName']))    
 
     return render(request, "users/friends.html",
                     {"author": author,
                     "friends": author.get_friends(),
                     "ext_friend": remote,
+                    "ext_freqs": remote_r,
                     "freqs": you.get_friend_requests()})
                     
                 
@@ -296,7 +303,6 @@ def localFollowing(request, author_id):
             local_f.append(friend)
         else:
             data = requests.get(f).json()
-            print(data)
             remote_f.append((data['id'], data['displayName']))
 
     return render(request, "users/following.html",
@@ -348,7 +354,6 @@ def localFollowers(request, author_id):
     local = []
     for f in remote_follower:
         data = requests.get(f.url).json()
-        print(data)
         remote.append((data['id'], data['displayName']))
 
     return render(request, "users/followers.html",

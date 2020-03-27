@@ -138,7 +138,7 @@ class Author(models.Model):
 
     def get_all_follower(self):
         all_follower = set()
-        for i in self.get_followers():
+        for i in self.followers.all():
             all_follower.add(i.pk)
         for i in self.ext_follower.all():
             all_follower.add(i.url)
@@ -160,6 +160,10 @@ class Author(models.Model):
         all_following = self.get_all_remote_following()
         all_follower = self.get_all_remote_follower()
         return all_following.intersection(all_follower)
+    
+    def get_remote_friend_request(self):
+        return self.ext_follower.all().difference(self.ext_following.all())
+        
     def __str__(self):
         return self.user.get_username()
 

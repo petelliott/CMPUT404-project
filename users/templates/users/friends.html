@@ -6,10 +6,11 @@
 
 <div class="friends-body">
     <div class="navigation">
-        <button onclick=" window.location.href = '{% url 'followers' author.pk|urlencode:"" %}'; ">Followers</button>
-        <button onclick=" window.location.href = '{% url 'following' author.pk %}' ; ">Following</button>
+        <button onclick="window.location.href = '{% url 'followers' author.pk|urlencode:"" %}';">Followers</button>
+        <button onclick="window.location.href = '{% url 'following' author.pk|urlencode:"" %}';">Following</button>
         <button class="active" onclick="window.location.href = '{% url 'friends' author.pk|urlencode:"" %}';">Friends</button>
     </div>
+
     <div class="content">
         <div class="friends">            
             <ul>
@@ -19,6 +20,16 @@
                     <form action="{% url 'profile' freq.pk|urlencode:"" %}" method="post">
                         {% csrf_token %}
                         <label>{{ freq.user.username }}</label>
+                        <button name="action" type="submit" value="accept-request">Accept</button>
+                        <button name="action" type="submit" value="reject-request">Reject</button>
+                    </form>
+                </li>              
+                {% endfor %}
+                {% for id,name in ext_freqs %}
+                <li>
+                    <form action="{% url 'profile' id|urlencode:"" %}" method="post">
+                        {% csrf_token %}
+                        <label>{{ name }}</label>
                         <button name="action" type="submit" value="accept-request">Accept</button>
                         <button name="action" type="submit" value="reject-request">Reject</button>
                     </form>

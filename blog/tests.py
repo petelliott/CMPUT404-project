@@ -4,6 +4,7 @@ from users.models import Author
 from .util import paginate
 import itertools
 import datetime
+import users
 
 # Create your tests here.
 class PrivacyTestCase(TestCase):
@@ -113,3 +114,28 @@ class PaginateTestCase(TestCase):
         self.assertEqual((3,4), tuple(paginate(l, 1, 3)))
         self.assertEqual((), tuple(paginate(l, 2, 3)))
         self.assertEqual((), tuple(paginate(l, 3, 3)))
+        
+        
+
+class SpongTest(TestCase):
+    # Testing Method
+    def setup(self):
+        self.clear()
+        user = users.models.User(username = 'qianyutest3',
+                                password = 'randompassword')
+        user.save()
+        node = users.models.Node(enabled = True,
+                                service='https://spongebook.herokuapp.com',
+                                user = user)
+        node.save()
+
+    def clear(self):
+        nodes = users.models.Node.allNodes()
+        for n in nodes:
+            n.delete()
+        users.models.User.objects.filter(username='qianyutest3').delete()
+    
+    
+    def test(self):
+        # TODO
+    
