@@ -247,7 +247,7 @@ def localFriends(request, author_id):
                     "ext_friend": remote,
                     "freqs": you.get_friend_requests()})
                     
-                    
+                
     
 def friends(request, author_id):
     '''
