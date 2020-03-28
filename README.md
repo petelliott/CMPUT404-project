@@ -6,7 +6,7 @@
 [API documentation](API.md)
 
 [Admin documentation](Admin.md)
-    
+
 ## Getting Started:
 ### Setup:
 ```
@@ -25,5 +25,8 @@ brew install libmagic
 python manage.py runserver
 ```
 
+### demo accounts
 
-
+on https://cmput404w20t06.herokuapp.com/ there are the following
+approved demo accounts (username/password) : `demo/demo`,
+`demo2/demo2`, `demo3/demo3`
