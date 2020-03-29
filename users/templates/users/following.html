@@ -11,11 +11,15 @@
         <button onclick="window.location.href = '{% url 'friends' author.pk|urlencode:"" %}';">Friends</button>
     </div>
 
+
     <div class="content">
         <div class="friends">            
             <ul>
             {% for f in following %}
                 <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.user.username }}</a></li>
+            {% endfor %}
+            {% for id,name in ext_following %}
+                <li><a href={% url 'profile' id|urlencode:"" %}>{{name }}</a></li>
             {% endfor %}
             </ul>
         </div>

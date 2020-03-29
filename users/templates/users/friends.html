@@ -25,12 +25,25 @@
                     </form>
                 </li>              
                 {% endfor %}
+                {% for id,name in ext_freqs %}
+                <li>
+                    <form action="{% url 'profile' id|urlencode:"" %}" method="post">
+                        {% csrf_token %}
+                        <label>{{ name }}</label>
+                        <button name="action" type="submit" value="accept-request">Accept</button>
+                        <button name="action" type="submit" value="reject-request">Reject</button>
+                    </form>
+                </li>              
+                {% endfor %}
             {% endif %}
             </ul>
             
             <ul>
             {% for f in friends %}
                 <li><a href={% url 'profile' f.id|urlencode:"" %}>{{f.user.username }}</a></li>
+            {% endfor %}
+            {% for id,name in ext_friend %}
+                <li><a href={% url 'profile' id|urlencode:"" %}>{{name }}</a></li>
             {% endfor %}
             </ul>
             

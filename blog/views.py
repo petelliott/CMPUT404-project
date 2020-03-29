@@ -65,11 +65,9 @@ def post(request):
 
     if request.method == "POST":
         form = PostForm(request.POST,request.FILES)
-        # print("p1")
 
         if form.is_valid():
             author = request.user.author
-            # print("p2")
 
             title = form.cleaned_data["title"]
             content = form.cleaned_data["content"]
@@ -156,9 +154,14 @@ def viewextpost(request, post_id):
     This function will renders the view post page for remote posts
     TODO: Don't think images are working properly. Should check this and fix if it doesn't work
     '''
-
-    p = requests.get(unquote(post_id)).json()
-
+    
+    try:
+        p = requests.get(unquote(post_id))
+        if p.status_code == 404:
+            raise Exception("Page Not Found")
+        p = p.json()
+    except Exception as e:
+        print(e)
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
     post_date = date_format_converter(p['published'])
@@ -181,9 +184,7 @@ def viewextpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            print("image: " + post.image.__str__())
             image_path = polarbear.settings.MEDIA_URL+image
-            print(image_path)
 
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
@@ -208,9 +209,7 @@ def viewlocalpost(request, post_id):
     else:
         if post.image != None:
             image = post.image.__str__()
-            print("image: " + post.image.__str__())
             image_path = polarbear.settings.MEDIA_URL+image
-            print(image_path)
 
 
     return render(request, "blog/viewpost.html",
@@ -230,9 +229,7 @@ def viewpost(request, post_id):
 
 def viewpic(request,file_name):
     file_name = "post_image/"+file_name
-    # print(file_name)
     post = get_object_or_404(models.Post, image=file_name)
-    # print(post.viewable_by(request.user))
     if not post.viewable_by(request.user):
         raise PermissionDenied
 
@@ -268,7 +265,9 @@ def nodeToPost(n):
         '''
 
     else:
-        json_resp = requests.get(n.service+"/posts").json()['posts']
+        url = n.service+"/posts"
+        json_resp = requests.get(url).json()['posts']
+
         for p in json_resp:
             post_user = auth.models.User(username=p['author']['displayName'])
             post_author = models.Author(id=p['author']['id'] ,user = post_user)
@@ -282,6 +281,7 @@ def nodeToPost(n):
 
 
     return posts
+    
 
 def getPublicPosts():
     '''
@@ -290,7 +290,7 @@ def getPublicPosts():
 
     nodes = users.models.Node.allNodes()
     allPosts = []
-
+    # init()
     for n in nodes:
         #if n.id == 2:
         posts = nodeToPost(n)
@@ -307,11 +307,6 @@ def allposts(request):
     # localPosts Data Format:
     # YYYY-MM-DD
     localPosts = list(models.Post.public())
-
-    '''
-    for i in localPosts:
-        print(i.get_date())
-    '''
 
     sortedPosts = (sorted(extPosts+localPosts, key=lambda x: x.get_date(),reverse = True))
 
