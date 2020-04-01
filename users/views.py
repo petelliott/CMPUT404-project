@@ -33,7 +33,7 @@ class SignupForm(forms.Form):
 
 class EditProfileForm(forms.Form):
     username = forms.CharField()
-    github = forms.CharField()
+    github = forms.CharField(required=False)
 
 def signup(request):
     if request.method == "POST":
@@ -383,9 +383,15 @@ def editProfile(request, author_id):
 
         try:
             request.user.username = form.cleaned_data["username"]
-            author.github = form.cleaned_data["github"] or None
-            author.save()
             request.user.save()
+
+            newgh = form.cleaned_data["github"] or None
+            if newgh != author.github:
+                author.github = newgh
+                author.save()
+                blog.models.clear_github_posts(author)
+                blog.models.update_github_posts(author)
+
             return redirect("profile", author_id=you.pk)
         except IntegrityError:
             return render(request, "users/profile.html",

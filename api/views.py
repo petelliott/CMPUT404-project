@@ -87,7 +87,7 @@ def serialize_author(request, author):
         "displayName": author.user.username,
         "url": api_reverse(request, "api_author",
                            author_id=author.pk),
-        "github": author.github,
+        "github": author.github and "https://github.com/"+author.github
     }
 
 def serialize_post(request, post):
