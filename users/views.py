@@ -16,6 +16,7 @@ from urllib.parse import unquote
 from api.views import serialize_author,api_reverse
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
+from api.views import request_host
 
 
 def toast(request):
@@ -241,9 +242,13 @@ def extFriends(request, author_id):
     author_json = requests.get(unquote(author_id), headers=authentication).json()
 
     for f in author_json['friends']:
-        fUser = auth.models.User(username=f['displayName'])
-        fAuthor = models.Author(id=f['id'] ,user = fUser)
-        friends.append(fAuthor)
+        if f['id'].startswith(request_host(request)):
+            friends.append(models.Author.objects.get(
+                pk=int(f['id'].split("/")[-1])))
+        else:
+            fUser = auth.models.User(username=f['displayName'])
+            fAuthor = models.Author(id=f['id'] ,user = fUser)
+            friends.append(fAuthor)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
@@ -304,9 +309,13 @@ def extFollowing(request, author_id):
     author_json = requests.get(unquote(author_id), headers=authentication).json()
 
     for f in author_json['friends']:
-        fUser = auth.models.User(username=f['displayName'])
-        fAuthor = models.Author(id=f['id'] ,user = fUser)
-        following.append(fAuthor)
+        if f['id'].startswith(request_host(request)):
+            following.append(models.Author.objects.get(
+                pk=int(f['id'].split("/")[-1])))
+        else:
+            fUser = auth.models.User(username=f['displayName'])
+            fAuthor = models.Author(id=f['id'] ,user = fUser)
+            following.append(fAuthor)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
@@ -348,7 +357,6 @@ def following(request, author_id):
         return extFollowing(request, author_id)
 
 
-
 def extFollowers(request, author_id):
     '''
     This function is used to render the followers list of a remote Author
@@ -359,9 +367,13 @@ def extFollowers(request, author_id):
     author_json = requests.get(unquote(author_id), headers=authentication).json()
 
     for f in author_json['friends']:
-        fUser = auth.models.User(username=f['displayName'])
-        fAuthor = models.Author(id=f['id'] ,user = fUser)
-        followers.append(fAuthor)
+        if f['id'].startswith(request_host(request)):
+            followers.append(models.Author.objects.get(
+                pk=int(f['id'].split("/")[-1])))
+        else:
+            fUser = auth.models.User(username=f['displayName'])
+            fAuthor = models.Author(id=f['id'] ,user = fUser)
+            followers.append(fAuthor)
 
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
