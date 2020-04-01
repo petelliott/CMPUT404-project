@@ -272,7 +272,7 @@ def nodeToPost(n):
 
     for p in json_resp:
         try:
-            post_user = auth.models.User(username=p['author']['displayName']+"["+n.service[8:]+"]")
+            post_user = auth.models.User(username=p['author']['displayName']+" ("+n.user.username+")")
             post_author = models.Author(id=removeTrailingFS(p['author']['id']) ,user = post_user)
             post_date = dateutil.parser.parse(p['published']).date()
             posts.append(models.Post(id=removeTrailingFS(p['source']),
