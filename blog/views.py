@@ -179,7 +179,12 @@ def viewextpost(request, post_id):
                   {"post": post, "edit": False,
                    "content": "",
                    "image":  ""})
-        
+
+    # Depending on interpretation of spec
+    # Accounts for is a single posts is paginated
+    if "posts" in p:
+        p = p["posts"][0]
+
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
     post_date = date_format_converter(p['published'])
