@@ -30,3 +30,9 @@ python manage.py runserver
 on https://cmput404w20t06.herokuapp.com/ there are the following
 approved demo accounts (username/password) : `demo/demo`,
 `demo2/demo2`, `demo3/demo3`
+
+### configuring github integration
+
+in order to not get rate limited by github, you need to create an
+oauth app and set the `GITHUB_AUTH` environment variable to
+`client_id:client_secret`.
