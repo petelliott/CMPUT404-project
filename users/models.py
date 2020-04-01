@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
 import requests
-
+from urllib.parse import urlparse
 
 class extAuthor(models.Model):
     url = models.URLField(max_length=200,primary_key=True)
@@ -217,6 +217,7 @@ class Node(models.Model):
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='node')
+    authentication = models.TextField(null = True)
 
     @classmethod
     def signup(cls, username, password, service):
@@ -241,3 +242,18 @@ class Node(models.Model):
     @classmethod
     def allNodes(cls):
         return cls.objects.all()
+
+    @classmethod
+    def URItoAuth(cls, uri):
+        '''
+        Given a uri, return the authentication header for that node
+        return a empty string if auth key not found
+        '''
+        nodes = cls.objects.all()
+        #print(uri)
+        for n in nodes:
+            #print("NODES:",urlparse(n.service).netloc," URI:",urlparse(uri).netloc)
+            if urlparse(n.service).netloc == urlparse(uri).netloc:
+                return {"Authorization":n.authentication}
+        print("URItoAuth Fail")
+        return ""
