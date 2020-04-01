@@ -184,6 +184,8 @@ def viewextpost(request, post_id):
     # Accounts for is a single posts is paginated
     if "posts" in p:
         p = p["posts"][0]
+    elif "post" in p:
+        p = p["post"]
 
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
