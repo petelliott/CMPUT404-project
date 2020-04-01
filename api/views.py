@@ -87,7 +87,7 @@ def serialize_author(request, author):
         "displayName": author.user.username,
         "url": api_reverse(request, "api_author",
                            author_id=author.pk),
-        "github": None #TODO
+        "github": author.github and "https://github.com/"+author.github
     }
 
 def serialize_post(request, post):
@@ -104,7 +104,7 @@ def serialize_post(request, post):
         "origin": api_reverse(request, "api_post", post_id=post.pk),
         "description": None, #TODO
         "contentType": post.content_type,
-        "content": post.content, #TODO: images	
+        "content": post.content, #TODO: images
         "author": serialize_author(request, post.author),
         #TODO: comments
         "published": post.date,
@@ -278,9 +278,9 @@ def author_from_url(host, id):
     else:
         author_id = int(id.split('/')[-1])
         assert False
-        
-        
-        
+
+
+
 def local_local_friendrequest(host, data):
     author_id = int(data["author"]["id"].split('/')[-1])
     author = get_object_or_404(Author, pk=author_id)
@@ -307,7 +307,7 @@ def remote_local_friendrequest(host, data):
     friend_id = int(data["friend"]["id"].split('/')[-1])
     friend = get_object_or_404(Author, pk=friend_id)
     friend.followed_by_remote(ext_author)
-    
+
     '''
     # ----- friend request format -----
     you_json = serialize_author(request,you)
@@ -319,7 +319,7 @@ def remote_local_friendrequest(host, data):
     target_url = author_json['host']+'friendrequest'
     requests.post( target_url, data=friend_request)
     '''
-    
+
 
 
 @csrf_exempt

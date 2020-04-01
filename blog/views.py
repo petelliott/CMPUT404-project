@@ -57,7 +57,6 @@ def date_format_converter(date):
     return post_date
 
 
-
 def post(request):
     author = users.models.Author.from_user(request.user)
     if author is None:
@@ -154,7 +153,7 @@ def viewextpost(request, post_id):
     This function will renders the view post page for remote posts
     TODO: Don't think images are working properly. Should check this and fix if it doesn't work
     '''
-    
+
     try:
         p = requests.get(unquote(post_id))
         if p.status_code == 404:
@@ -281,7 +280,7 @@ def nodeToPost(n):
 
 
     return posts
-    
+
 
 def getPublicPosts():
     '''

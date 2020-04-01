@@ -112,6 +112,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+GH_CID, GH_SECRET = os.environ.get("GITHUB_AUTH",":").split(":")
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/

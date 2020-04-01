@@ -6,51 +6,53 @@ import requests
 
 class extAuthor(models.Model):
     url = models.URLField(max_length=200,primary_key=True)
-    
+
     def get_following(self):
         data = requests.get(self.url).json()
         friends = data['friends']
-        return friends    
-    
+        return friends
+
 
 class Author(models.Model):
     #TODO: this is where we will put friends and stuff
     number = models.IntegerField() #TODO: delete this
     friends = models.ManyToManyField('self', related_name='followers',
                                      symmetrical=False)
-    
+
     # list of <author_id> of remote user
     ext_following = models.ManyToManyField(extAuthor, related_name='ext_followers',
                                          symmetrical=False)
-    
+
     ext_follower = models.ManyToManyField(extAuthor,  related_name='ext_followings',
                                          symmetrical=False)
-    
+
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name='author')
     create_time = models.DateTimeField(auto_now = True)
     github = models.TextField(null = True)
 
+
+
     def follow(self, other):
         self.friends.add(other)
 
     def unfollow(self, other):
         self.friends.remove(other)
-        
+
     def follow_ext(self,other):
         self.ext_following.add(other)
-    
+
     def unfollow_ext(self,other):
         self.ext_following.remove(other)
-        
+
     def follow_by_ext(self,other):
         self.ext_follower.add(other)
-        
+
     def unfollow_by_ext(self,other):
         self.ext_follower.remove(other)
-        
-        
+
+
     def follows(self, other):
         try:
             if isinstance(other.id,int):
@@ -77,7 +79,7 @@ class Author(models.Model):
             TODO: We need this function to also get A's remote friends(We may need to standardize the data type)
         '''
         return self.friends.all().intersection(self.followers.all())
-    
+
     def get_friend_requests(self):
         '''
             Get A's all local friend requests
@@ -126,8 +128,8 @@ class Author(models.Model):
             return self.posts.all()
         else:
             return filter( lambda p: p.listable_to(user), self.posts.all())
-        
-        
+
+
     def get_all_following(self):
         all_following = set()
         for i in self.friends.all():
@@ -148,7 +150,7 @@ class Author(models.Model):
         all_following = self.get_all_following()
         all_follower = self.get_all_follower()
         return all_following.intersection(all_follower)
-    
+
 
     def get_all_remote_following(self):
         return self.ext_following.all()
@@ -160,10 +162,10 @@ class Author(models.Model):
         all_following = self.get_all_remote_following()
         all_follower = self.get_all_remote_follower()
         return all_following.intersection(all_follower)
-    
+
     def get_remote_friend_request(self):
         return self.ext_follower.all().difference(self.ext_following.all())
-        
+
     def __str__(self):
         return self.user.get_username()
 

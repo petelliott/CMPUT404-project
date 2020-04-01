@@ -1,5 +1,8 @@
 from django.db import models
 from users.models import Author
+import polarbear.settings
+import requests
+import dateutil
 
 class Privacy:
     #TODO: private to specific author
@@ -9,6 +12,67 @@ class Privacy:
     FOAF     = 3
     PUBLIC   = 4
 
+def event_iter(gh):
+    i = 1
+    while True:
+        r = requests.get("https://api.github.com/users/{}/events?page={}"\
+                         .format(gh, i),
+                         auth=(polarbear.settings.GH_CID,
+                               polarbear.settings.GH_SECRET))
+
+        i += 1
+        if r.status_code != 200:
+            break
+
+        yield from r.json()
+
+def update_github_posts(author):
+    if author.github == None:
+        return
+
+    for i,event in enumerate(event_iter(author.github)):
+        if event["type"] == "WatchEvent" or event["type"] == "RepositoryEvent":
+            if Post.objects.filter(gh_event_id=event["id"]).exists():
+                continue
+
+            post = Post.objects.create(
+                date=dateutil.parser.parse(
+                    event['created_at']).date(),
+                title="{} repository {}".format(
+                    event['payload']['action'],
+                    event['repo']['name']
+                ),
+                content="[{0}{1}]({0}{1})".format(
+                    "https://github.com/",
+                    event['repo']['name']),
+                author=author,
+                content_type="text/markdown",
+                image = None,
+                privacy=Privacy.PUBLIC,
+                gh_event_id=event["id"])
+        elif (event["type"] == "CreateEvent" and
+              event["payload"]["ref_type"] == "repository"):
+            post = Post.objects.create(
+                date=dateutil.parser.parse(
+                    event['created_at']).date(),
+                title="created repository {}".format(
+                    event['repo']['name']
+                ),
+                content="{2}\n\n[{0}{1}]({0}{1})".format(
+                    "https://github.com/",
+                    event['repo']['name'],
+                    event['payload']['description'],
+                ),
+                author=author,
+                content_type="text/markdown",
+                image = None,
+                privacy=Privacy.PUBLIC,
+                gh_event_id=event["id"])
+
+
+def clear_github_posts(author):
+    Post.objects.filter(author=author).exclude(gh_event_id=None).delete()
+
 # Create your models here.
 class Post(models.Model):
     date         = models.DateField()
@@ -17,7 +81,7 @@ class Post(models.Model):
     content_type = models.CharField(max_length=150)
     author       = models.ForeignKey(Author, on_delete=models.CASCADE,
                                related_name='posts')
-    
+    gh_event_id  = models.CharField(max_length=150, null=True)
     image = models.ImageField(upload_to='post_image/',blank = True)
     privacy = models.IntegerField(default=Privacy.PUBLIC)
 
@@ -41,8 +105,8 @@ class Post(models.Model):
             return False
 
         return False
-    
-    
+
+
     def get_date(self):
         return self.date
 

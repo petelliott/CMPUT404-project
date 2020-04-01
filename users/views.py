@@ -33,6 +33,7 @@ class SignupForm(forms.Form):
 
 class EditProfileForm(forms.Form):
     username = forms.CharField()
+    github = forms.CharField(required=False)
 
 def signup(request):
     if request.method == "POST":
@@ -95,13 +96,13 @@ def getExtAuthorPosts(author_origin):
     '''
     posts = []
     posts_json = requests.get(unquote(author_origin)+"/posts").json()['posts']
-    
+
     for p in posts_json:
         post_user = auth.models.User(username=p['author']['displayName'])
 
         post_author = models.Author(id=p['author']['id'] ,user = post_user)
-        posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))  
-        
+        posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
+
     return posts
 
 def extProfile(request, author_id):
@@ -125,7 +126,7 @@ def extProfile(request, author_id):
         if request.POST["action"] == "follow":
             # you.follow(author)
             you.follow_ext(ext_friend)
-            
+
             # ----- friend request format -----
             friend_request = {}
             you_json = serialize_author(request,you)
@@ -152,7 +153,7 @@ def extProfile(request, author_id):
             return redirect('profile', you.pk)
     elif request.method == 'GET':
         pass
-    
+
     return render(request, "users/profile.html",
                         {"author": author,
                         "follows": you.follows(author),
@@ -187,7 +188,8 @@ def localProfile(request, author_id):
 
         return redirect('profile', author_id)
     else:
-        form = EditProfileForm(initial={"username": request.user.username})
+        form = EditProfileForm(initial={"username": request.user.username,
+                                        "github": you.github})
 
         return render(request, "users/profile.html",
                       {"author": author,
@@ -208,7 +210,7 @@ def profile(request, author_id):
         return localProfile(request, author_id)
     else:
         return extProfile(request, author_id)
-    
+
 
 def extFriends(request, author_id):
     '''
@@ -240,12 +242,12 @@ def localFriends(request, author_id):
     for f in remote_friends:
         data = requests.get(f.url).json()
         remote.append((data['id'], data['displayName']))
-    
+
     remote_request = author.get_remote_friend_request()
     remote_r = []
     for r in remote_request:
         data = requests.get(f.url).json()
-        remote_r.append((data['id'], data['displayName']))    
+        remote_r.append((data['id'], data['displayName']))
 
     return render(request, "users/friends.html",
                     {"author": author,
@@ -253,9 +255,9 @@ def localFriends(request, author_id):
                     "ext_friend": remote,
                     "ext_freqs": remote_r,
                     "freqs": you.get_friend_requests()})
-                    
-                
-    
+
+
+
 def friends(request, author_id):
     '''
     If the author_id is a number, it is a local post
@@ -266,9 +268,9 @@ def friends(request, author_id):
 
     else:
         return extFriends(request, author_id)
-    
 
-    
+
+
 
 def extFollowing(request, author_id):
     '''
@@ -290,7 +292,7 @@ def extFollowing(request, author_id):
                         {"author": author,
                         #TODO: Change this to get following instead of just friends
                         "following": following})
-    
+
 def localFollowing(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
     you = models.Author.from_user(request.user)
@@ -320,7 +322,7 @@ def following(request, author_id):
 
     else:
         return extFollowing(request, author_id)
-    
+
 
 
 def extFollowers(request, author_id):
@@ -343,8 +345,8 @@ def extFollowers(request, author_id):
                         {"author": author,
                         #TODO: Change this to get followers instead of just friends
                         "followers": followers})
-    
-    
+
+
 def localFollowers(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
     you = models.Author.from_user(request.user)
@@ -370,7 +372,7 @@ def followers(request, author_id):
         return localFollowers(request, author_id)
     else:
         return extFollowers(request, author_id)
-        
+
 @require_POST
 def editProfile(request, author_id):
     author = get_object_or_404(models.Author, pk=author_id)
@@ -382,6 +384,14 @@ def editProfile(request, author_id):
         try:
             request.user.username = form.cleaned_data["username"]
             request.user.save()
+
+            newgh = form.cleaned_data["github"] or None
+            if newgh != author.github:
+                author.github = newgh
+                author.save()
+                blog.models.clear_github_posts(author)
+                blog.models.update_github_posts(author)
+
             return redirect("profile", author_id=you.pk)
         except IntegrityError:
             return render(request, "users/profile.html",
@@ -391,6 +401,3 @@ def editProfile(request, author_id):
                        "posts": author.authors_posts(request.user),
                        "form": form,
                        "taken": True})
-
-
-   
