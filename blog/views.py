@@ -148,6 +148,8 @@ def delete(request, post_id):
     post.delete()
     return redirect('root')
 
+
+
 def viewextpost(request, post_id):
     '''
     This function will renders the view post page for remote posts
@@ -155,17 +157,38 @@ def viewextpost(request, post_id):
     '''
 
     try:
-        p = requests.get(unquote(post_id))
+        authentication = users.models.Node.URItoAuth(unquote(post_id))
+        p = requests.get(unquote(post_id), headers=authentication)
         if p.status_code == 404:
             raise Exception("Page Not Found")
         p = p.json()
     except Exception as e:
         print(e)
+        # If we can't request the post, return a does not exist
+        post_user = auth.models.User(username="")
+        post_author = models.Author(id=" " ,user = post_user)
+
+        post = models.Post( id     = unquote(post_id),
+                            date   = "",
+                            title  = "Post Does Not Exist",
+                            content= "",
+                            author = post_author,
+                            content_type= "text/plain")
+
+        return render(request, "blog/viewpost.html",
+                  {"post": post, "edit": False,
+                   "content": "",
+                   "image":  ""})
+
+    # Depending on interpretation of spec
+    # Accounts for is a single posts is paginated
+    if "posts" in p:
+        p = p["posts"][0]
+
     post_user = auth.models.User(username=p['author']['displayName'])
     post_author = models.Author(id=p['author']['id'] ,user = post_user)
     post_date = date_format_converter(p['published'])
 
-    # TODO: We may need to standardize the date format somehow
     post = models.Post( id     = p['source'],
                         date   = post_date,
                         title  = p['title'],
@@ -236,7 +259,11 @@ def viewpic(request,file_name):
         return HttpResponse(f.read(), content_type=post.content_type)
 
 
-
+def removeTrailingFS(uri):
+    if uri[-1] == "/":
+        return uri[:-1]
+    else:
+        return uri
 
 def nodeToPost(n):
     '''
@@ -244,39 +271,23 @@ def nodeToPost(n):
     '''
     posts = []
 
-    # Cheap hack until everyone has proper APIs
-    if(n.service == "https://cloud-align-server.herokuapp.com"):
-        # This team's API seems like it's not working right now
-        # Leave this in depending on if they get their API fixed before the demo or not
-        pass
-        '''
-        json_resp = requests.get(n.service+"/posts", headers={"Authorization":"Token d319c1aa88b6bf314faee4179b3a817ecbb9516d"}).json()
+    authentication = {"Authorization":n.authentication}
+    url = n.service+"/posts"
+    json_resp = requests.get(url, headers=authentication).json()['posts']
 
-        for p in json_resp:
-            post_user = auth.models.User(username=p['author_data']['displayName'])
-            post_author = models.Author(id=p['author'] ,user = post_user)
-            posts.append(models.Post(id=p['id'],
-                                     date=p['publish'],
-                                     title=p['title'],
-                                     content=p['content'],
-                                     author=post_author,
-                                     content_type=p['contentType']))
-        '''
-
-    else:
-        url = n.service+"/posts"
-        json_resp = requests.get(url).json()['posts']
-
-        for p in json_resp:
-            post_user = auth.models.User(username=p['author']['displayName'])
-            post_author = models.Author(id=p['author']['id'] ,user = post_user)
+    for p in json_resp:
+        try:
+            post_user = auth.models.User(username=p['author']['displayName']+" ("+n.user.username+")")
+            post_author = models.Author(id=removeTrailingFS(p['author']['id']) ,user = post_user)
             post_date = dateutil.parser.parse(p['published']).date()
-            posts.append(models.Post(id=p['source'],
-                                     date=post_date,
-                                     title=p['title'],
-                                     content=p['content'],
-                                     author=post_author,
-                                     content_type=p['contentType']))
+            posts.append(models.Post(id=removeTrailingFS(p['source']),
+                                    date=post_date,
+                                    title=p['title'],
+                                    content=p['content'],
+                                    author=post_author,
+                                    content_type=p['contentType']))
+        except KeyError:
+            continue
 
 
     return posts
@@ -291,9 +302,9 @@ def getPublicPosts():
     allPosts = []
     # init()
     for n in nodes:
-        #if n.id == 2:
-        posts = nodeToPost(n)
-        allPosts += posts
+        if n.enabled:
+            posts = nodeToPost(n)
+            allPosts += posts
         #return [s.service]
     return allPosts
 

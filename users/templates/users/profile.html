@@ -12,7 +12,7 @@
 <div class="profile-header"> 
   {% if author and author.user == user %}
     <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
-  {% else %}
+  {% elif not DNE %}
     <form action="{% url 'profile' author.pk|urlencode:"" %}" method="post">
       {% csrf_token %}
       {% if follows %}
@@ -23,10 +23,12 @@
     </form>
   {% endif %}
   <h2>{{ author.user.username }}</h2><br>
-  <span class="friends"><a href={% url 'followers' author.pk|urlencode:"" %}><b>{{ followers|length }}</b> Followers</a></span>
-  <span class="friends"><a href={% url 'following' author.pk|urlencode:"" %}><b>{{ following|length }}</b> Following</a></span>
-  <span class="friends"><a href={% url 'friends' author.pk|urlencode:"" %}><b>{{ friends|length }}</b> Friends {% if  freqs|length  > 0 and author.user == user %}<b class="freqs">{{ freqs|length }}</b>{% endif %}</a></span>
-  
+
+  {% if not DNE %}
+    <span class="friends"><a href={% url 'followers' author.pk|urlencode:"" %}><b>{{ followers|length }}</b> Followers</a></span>
+    <span class="friends"><a href={% url 'following' author.pk|urlencode:"" %}><b>{{ following|length }}</b> Following</a></span>
+    <span class="friends"><a href={% url 'friends' author.pk|urlencode:"" %}><b>{{ friends|length }}</b> Friends {% if  freqs|length  > 0 and author.user == user %}<b class="freqs">{{ freqs|length }}</b>{% endif %}</a></span>
+  {% endif %}
   
 
 </div>
