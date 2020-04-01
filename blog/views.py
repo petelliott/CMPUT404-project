@@ -16,6 +16,7 @@ import requests
 import json
 from urllib.parse import unquote
 import dateutil.parser
+from urllib.parse import urlparse
 
 class PostForm(forms.Form):
     title = forms.CharField()
@@ -279,15 +280,19 @@ def nodeToPost(n):
 
     for p in json_resp:
         try:
-            post_user = auth.models.User(username=p['author']['displayName']+" ("+n.user.username+")")
-            post_author = models.Author(id=removeTrailingFS(p['author']['id']) ,user = post_user)
-            post_date = dateutil.parser.parse(p['published']).date()
-            posts.append(models.Post(id=removeTrailingFS(p['source']),
-                                    date=post_date,
-                                    title=p['title'],
-                                    content=p['content'],
-                                    author=post_author,
-                                    content_type=p['contentType']))
+            # Only requests posts that come from same the host as the node
+            if urlparse(n.service).netloc == urlparse(p['source']).netloc:
+                post_user = auth.models.User(username=p['author']['displayName']+" ("+n.user.username+")")
+                post_author = models.Author(id=removeTrailingFS(p['author']['id']) ,user = post_user)
+                post_date = dateutil.parser.parse(p['published']).date()
+                posts.append(models.Post(id=removeTrailingFS(p['source']),
+                                        date=post_date,
+                                        title=p['title'],
+                                        content=p['content'],
+                                        author=post_author,
+                                        content_type=p['contentType']))
+            else:
+                continue
         except KeyError:
             continue
 
