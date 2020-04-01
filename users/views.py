@@ -113,11 +113,25 @@ def extProfile(request, author_id):
     This function is used to render the profile of a remote Author from another server
     '''
     #TODO: Currently no code for handeling following and unfollowing Authors from other servers
-    authentication = models.Node.URItoAuth(unquote(author_id))
-    author_json = requests.get(unquote(author_id), headers=authentication).json()
+    try:
+        authentication = models.Node.URItoAuth(unquote(author_id))
+        author_json = requests.get(unquote(author_id), headers=authentication).json()
+        user = auth.models.User(username=author_json['displayName'])
+        author = models.Author(id=author_json['id'] ,user = user)
+    except:
+        # User does not exist if unable to get 
+        user = auth.models.User(username="User Does Not Exist")
+        author = models.Author(id=unquote(author_id) ,user = user)
+        return render(request, "users/profile.html",
+                        {"author": author,
+                        "follows": False,
+                        "posts": [],
+                        "followers": [],
+                        "following": [],
+                        "friends": [],
+                        "DNE": True})
+
     posts = getExtAuthorPosts(author_id)
-    user = auth.models.User(username=author_json['displayName'])
-    author = models.Author(id=author_json['id'] ,user = user)
     you = models.Author.from_user(request.user)
     try:
         models.extAuthor.objects.get(url = author_json['id'])
