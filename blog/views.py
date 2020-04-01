@@ -297,9 +297,9 @@ def getPublicPosts():
     allPosts = []
     # init()
     for n in nodes:
-        #if n.id == 2:
-        posts = nodeToPost(n)
-        allPosts += posts
+        if n.enabled:
+            posts = nodeToPost(n)
+            allPosts += posts
         #return [s.service]
     return allPosts
 
