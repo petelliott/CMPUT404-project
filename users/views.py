@@ -17,6 +17,7 @@ from api.views import serialize_author,api_reverse
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 
+
 def toast(request):
     messages.success(request,"Sign up successully but please wait for approve")
 
@@ -95,7 +96,9 @@ def getExtAuthorPosts(author_origin):
     Given the externalID of a Author. This function will return a lists of all Public posts for that Author
     '''
     posts = []
-    posts_json = requests.get(unquote(author_origin)+"/posts").json()['posts']
+    authentication = models.Node.URItoAuth(unquote(author_origin))
+    #print(authentication)
+    posts_json = requests.get(unquote(author_origin)+"/posts", headers=authentication).json()['posts']
 
     for p in posts_json:
         post_user = auth.models.User(username=p['author']['displayName'])
@@ -110,7 +113,8 @@ def extProfile(request, author_id):
     This function is used to render the profile of a remote Author from another server
     '''
     #TODO: Currently no code for handeling following and unfollowing Authors from other servers
-    author_json = requests.get(unquote(author_id)).json()
+    authentication = models.Node.URItoAuth(unquote(author_id))
+    author_json = requests.get(unquote(author_id), headers=authentication).json()
     posts = getExtAuthorPosts(author_id)
     user = auth.models.User(username=author_json['displayName'])
     author = models.Author(id=author_json['id'] ,user = user)
@@ -135,7 +139,8 @@ def extProfile(request, author_id):
             friend_request["friend"] = author_json
             # ----- friend request format -----
             target_url = author_json['host']+'friendrequest'
-            requests.post( target_url, data=friend_request)
+            authentication = models.Node.URItoAuth(unquote(target_url))
+            requests.post( target_url, data=friend_request, headers=authentication)
 
         elif request.POST["action"] == "un-follow":
             try:
@@ -218,7 +223,8 @@ def extFriends(request, author_id):
     '''
 
     friends = []
-    author_json = requests.get(unquote(author_id)).json()
+    authentication = models.Node.URItoAuth(unquote(author_id))
+    author_json = requests.get(unquote(author_id), headers=authentication).json()
 
     for f in author_json['friends']:
         fUser = auth.models.User(username=f['displayName'])
@@ -240,13 +246,15 @@ def localFriends(request, author_id):
     remote_friends = author.get_all_remote_friend()
     remote = []
     for f in remote_friends:
-        data = requests.get(f.url).json()
+        authentication = models.Node.URItoAuth(f.url)
+        data = requests.get(f.url, headers=authentication).json()
         remote.append((data['id'], data['displayName']))
 
     remote_request = author.get_remote_friend_request()
     remote_r = []
     for r in remote_request:
-        data = requests.get(f.url).json()
+        authentication = models.Node.URItoAuth(f.url)
+        data = requests.get(f.url, headers=authentication).json()
         remote_r.append((data['id'], data['displayName']))
 
     return render(request, "users/friends.html",
@@ -278,7 +286,8 @@ def extFollowing(request, author_id):
     '''
 
     following = []
-    author_json = requests.get(unquote(author_id)).json()
+    authentication = models.Node.URItoAuth(unquote(author_id))
+    author_json = requests.get(unquote(author_id), headers=authentication).json()
 
     for f in author_json['friends']:
         fUser = auth.models.User(username=f['displayName'])
@@ -304,7 +313,8 @@ def localFollowing(request, author_id):
             friend = get_object_or_404(models.Author, pk=f)
             local_f.append(friend)
         else:
-            data = requests.get(f).json()
+            authentication = models.Node.URItoAuth(f)
+            data = requests.get(f, headers=authentication).json()
             remote_f.append((data['id'], data['displayName']))
 
     return render(request, "users/following.html",
@@ -331,7 +341,8 @@ def extFollowers(request, author_id):
     '''
 
     followers = []
-    author_json = requests.get(unquote(author_id)).json()
+    authentication = models.Node.URItoAuth(unquote(author_id))
+    author_json = requests.get(unquote(author_id), headers=authentication).json()
 
     for f in author_json['friends']:
         fUser = auth.models.User(username=f['displayName'])
@@ -355,7 +366,8 @@ def localFollowers(request, author_id):
     remote = []
     local = []
     for f in remote_follower:
-        data = requests.get(f.url).json()
+        authentication = models.Node.URItoAuth(f.url)
+        data = requests.get(f.url, headers=authentication).json()
         remote.append((data['id'], data['displayName']))
 
     return render(request, "users/followers.html",
