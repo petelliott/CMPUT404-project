@@ -306,7 +306,7 @@ def remote_local_friendrequest(host, data):
     ext_author = models.extAuthor.objects.get(url = data["author"]['id'])
     friend_id = int(data["friend"]["id"].split('/')[-1])
     friend = get_object_or_404(Author, pk=friend_id)
-    friend.followed_by_remote(ext_author)
+    friend.follow_by_ext(ext_author)
 
     '''
     # ----- friend request format -----

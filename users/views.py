@@ -119,7 +119,7 @@ def extProfile(request, author_id):
         user = auth.models.User(username=author_json['displayName'])
         author = models.Author(id=author_json['id'] ,user = user)
     except:
-        # User does not exist if unable to get 
+        # User does not exist if unable to get
         user = auth.models.User(username="User Does Not Exist")
         author = models.Author(id=unquote(author_id) ,user = user)
         return render(request, "users/profile.html",
@@ -154,7 +154,7 @@ def extProfile(request, author_id):
             # ----- friend request format -----
             target_url = author_json['host']+'friendrequest'
             authentication = models.Node.URItoAuth(unquote(target_url))
-            requests.post( target_url, data=friend_request, headers=authentication)
+            requests.post( target_url, json=friend_request, headers=authentication)
 
         elif request.POST["action"] == "un-follow":
             try:
