@@ -4,6 +4,23 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'blog/postfeed.css'%}">{% endblock %}
 {% block content %}
 
+<div class="create-post">
+  <form id = 'p' action="{% url 'post' %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+    {% csrf_token %}
+    <div class="title">{{ form.title }}</div>
+    <div class="content">{{ form.content }}</div>
+    <p class="post_image" style="display: none;">{{ form.image }}</p>
+    <div class="options">
+      <span class="privacy">{{ form.privacy }}</span>
+      <span class="content_type">{{ form.content_type }}</span>
+    </div>
+    
+    <input id="new-post-button" type="submit" value="Post">
+  </form>
+  
+  <script type="text/javascript" src = "{% static 'blog/index.js'%}" ></script>
+</div>
+
 <div class="home-body">
   <div class="navigation">
     {% if fPosts %}
