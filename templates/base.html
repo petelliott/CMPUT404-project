@@ -9,10 +9,10 @@
   </head>
   <body>
     <div class="mainbar">
-      <h1><a href="/" class="nolinkstyle">PolarBear</a></h1>
+      <h1><a href="/" class="nolinkstyle"><img src="{% static 'rightbearicon.png' %}" height="30">Polar Bear<img src="{% static 'leftbearicon.png' %}" height="30"></a></h1>
       {% if user and user.is_authenticated and user.author%}
       <div class="baroption">
-        <p>welcome, {{ user.username }}</p>
+        <p>Welcome, {{ user.username }}</p>
         <a href="{% url 'profile' user.author.pk %}" class="buttonlink">Profile</a>
         <a href="/" class="buttonlink">Home</a>
         <a href="{% url 'post' %}" class="buttonlink">Post</a>

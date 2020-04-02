@@ -1,7 +1,7 @@
 body {
     margin: 0;
     padding: 0;
-    background: white;
+    background: #F9F9F9;
 }
 
 * {
@@ -119,8 +119,26 @@ body {
 a.nolinkstyle {
     text-decoration: none;
     color: white;
+    padding-left: 25px;
+    padding-right: 25px; 
 }
+
+a.nolinkstyle:hover{
+    text-decoration: none;
+    color: white; 
+}
+
 
 friend-request {
     display: inline;
+}
+
+.baroption p{
+    padding-left: 15px;
+    padding-right: 15px; 
+}
+
+img {
+    position: relative;
+    top: 8px;
 }

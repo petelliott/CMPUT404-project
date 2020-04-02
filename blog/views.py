@@ -19,7 +19,7 @@ import dateutil.parser
 from urllib.parse import urlparse
 
 class PostForm(forms.Form):
-    title = forms.CharField()
+    title = forms.CharField(widget= forms.TextInput(attrs={'placeholder':'Title'}))
 
     privacy = forms.IntegerField(widget=forms.Select(choices=(
         (Privacy.PUBLIC, "Public"),
@@ -34,7 +34,7 @@ class PostForm(forms.Form):
         ("text/markdown", "Markdown"),
         ("undefined_image_type", "Image"),
     )))
-    content = forms.CharField(widget=forms.Textarea, required=False)
+    content = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Enter your post'}), required=False)
     image = forms.ImageField(label = 'Choose an Image', required=False)
 
 
@@ -326,10 +326,12 @@ def allposts(request):
     localPosts = list(models.Post.public())
 
     sortedPosts = (sorted(extPosts+localPosts, key=lambda x: x.get_date(),reverse = True))
+    form = PostForm()
 
     return render(request, "blog/postlist.html",
                   {"posts": sortedPosts,
-                   "title": "Public Posts"})
+                   "title": "Public Posts",
+                   "form": form})
 
 def friends(request):
     author = users.models.Author.from_user(request.user)

@@ -1,25 +1,42 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ post.title }}{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'blog/viewpost.css'%}">{% endblock %}
 {% block content %}
 
-<h2>{{ post.title }}</h2>
-<p><a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
-  -- {{ post.date }}</p>
 
-{% if edit %}
-<p><a class="buttonlink" href="{% url 'edit' post.pk %}">edit</a></p>
-{% endif %}
-
-{% if post.content_type == "text/plain" %}
-	<p>{{ content }}</p>
-{% elif post.content_type == "text/markdown" %}
-	{% autoescape off %}
-	{{ content }}
-	{% endautoescape %}
-{% else %}
-	{% if post.image %}
-		<img src = "{{ image }}" alt ="haha" >
+<div class="post-header">
+	{% if edit %}
+	<button class="editbutton" onclick="window.location.href = '{% url 'edit' post.pk %}';">Edit Post</button>
 	{% endif %}
-{% endif %}
+
+	<h2>{{ post.title }}</h2>
+	<p>Submitted by <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
+	on {{ post.date }}</p>
+	
+</div>
+<div class="post-content">
+	<div class="post-container">
+		{% if post.content_type == "text/plain" %}
+			<p>{{ content }}</p>
+		{% elif post.content_type == "text/markdown" %}
+			{% autoescape off %}
+			{{ content }}
+			{% endautoescape %}
+		{% else %}
+			{% if post.image %}
+				<img src = "{{ image }}" alt ="haha" >
+			{% endif %}
+		{% endif %}
+	</div>
+</div>
+<div class="post-comments">
+    <h1>Comments</h1>
+</div>
+
+
+
+
+
 
 {% endblock %}

@@ -22,8 +22,12 @@
       {% endif %}
     </form>
   {% endif %}
-  <h2>{{ author.user.username }}</h2><br>
-
+  <h2>{{ author.user.username }}</h2>
+  
+  {% if author.github %}
+  <p>{{ author.github }}</p><br>
+  {% endif %}
+  
   {% if not DNE %}
     <span class="friends"><a href={% url 'followers' author.pk|urlencode:"" %}><b>{{ followers|length }}</b> Followers</a></span>
     <span class="friends"><a href={% url 'following' author.pk|urlencode:"" %}><b>{{ following|length }}</b> Following</a></span>
@@ -50,15 +54,22 @@
       </div>
     </div>
   </div>
-  <ol>
-      {% for post in posts %}
-        <li>
-          <a href="{% url 'viewpost' post.pk|urlencode:"" %}">{{ post.title }}</a>
-          --
-          <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
-        </li>
-      {% endfor %}
-  </ol>
+  <div class="content">
+
+    {% for post in posts %}
+    <div class="posts" onclick="location.href='{% url 'viewpost' post.pk|urlencode:"" %}';">
+      <div class="phead">
+        <div class="ptitle">{{ post.title }}</div>
+      </div>
+      <div class="pbody">
+        Posted by <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
+        on <span>{{ post.date }}</span><br><br>
+        <div class="pcontent">{{ post.content|truncatechars:80 }}</div>
+      </div>
+    </div>
+    {% endfor %}
+    
+  </div>
 </div>
 
 <script src="{% static 'users/profile.js'%}"></script>
