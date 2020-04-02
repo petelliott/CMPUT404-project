@@ -106,8 +106,14 @@ def serialize_post(request, post):
         "contentType": post.content_type,
         "content": post.content, #TODO: images
         "author": serialize_author(request, post.author),
+
         #TODO: comment pagination
-        "comments": [serialize_comment(c) for c in post.comments.all()],
+        "count": len(post.comments.all()),
+        "size": DEFAULT_PAGE_SIZE,
+        "next": api_reverse(request, "api_post_comments", post_id=post.pk),
+        "comments": [serialize_comment(c)
+                     for c in paginate(post.comments.all(), 0, 5)],
+
         "published": post.date,
         "id": post.pk,
         "visibility": visibility_table[post.privacy],
