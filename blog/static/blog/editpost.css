@@ -1,0 +1,68 @@
+input[type=text], select, textarea {
+    width: 100%;
+    padding: 15px 20px;
+    margin: 10px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+form div {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+
+.post-content{
+    margin-left:20%; 
+    margin-right:20%; 
+    border-style: solid;
+    border-color: lightgray;
+    border-width: 1px;
+    padding: 0px 30px 30px 30px;
+    background-color: white;
+    overflow: hidden;
+}
+
+#save-button{
+    color: #2e7acd;
+    background-color: white;
+    border: none;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #2e7acd;
+    display: block;
+    float: right;
+    padding: 10px 20px;
+    text-align: center;
+    font-weight: bold;
+    border-width: 1px;
+    border-radius: 16px;
+}
+
+#save-button:hover{
+    background-color: #2e7bcd2d;
+}
+
+
+#delete-button{
+    margin-right: 10px;
+    color: #e00c29de;
+    background-color: white;
+    border: none;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #e00c29de;
+    display: block;
+    float: right;
+    padding: 10px 20px;
+    text-align: center;
+    font-weight: bold;
+    border-width: 1px;
+    border-radius: 16px;
+}
+
+#delete-button:hover{
+    background-color: #e00c2842;
+}

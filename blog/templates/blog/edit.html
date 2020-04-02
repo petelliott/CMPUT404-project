@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}PolarBear -- Editing{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'blog/editpost.css'%}">{% endblock %}
 {% block content %}
-<form id = 'p' action="{% url 'edit' post.pk %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Save">
-  <button type="submit"
-          formaction="{% url 'delete' post.pk %}"
-          onclick="return confirm('Are you sure you want to delete this post?');">
-    Delete
-  </button>
-</form>
+
+<div class="post-content">
+  <form id = 'p' action="{% url 'edit' post.pk %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input id="save-button" type="submit" value="Save">
+    <button id="delete-button" type="submit"
+            formaction="{% url 'delete' post.pk %}"
+            onclick="return confirm('Are you sure you want to delete this post?');">
+      Delete
+    </button>
+  </form>
+</div>
 <script type="text/javascript" src = "{% static 'blog/index.js'%}" ></script>
 
 {% endblock %}
