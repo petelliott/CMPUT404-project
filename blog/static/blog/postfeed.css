@@ -26,15 +26,47 @@
     border-bottom: 2px solid #2e7acd;
 }
 
-
-.content {
-    padding: 5px 15px;
-}
-
 .home-body{
     margin-left:20%; 
     margin-right:20%; 
     border-style: solid;
     border-color: lightgray;
     border-width: 1px;
+}
+
+.posts {
+    padding: 10px 20px 10px 20px;
+    list-style-type:none;
+    border-bottom: 1px solid lightgray;
+    background-color: white;
+    cursor: pointer;
+}
+
+.ptitle {
+    color: black;
+    font-size: 18pt;
+    font-weight: 800;
+}
+
+.posts a {
+    text-decoration: none;
+    color: grey;
+    font-weight: 1000;
+}
+
+.posts a:hover {
+    text-decoration: underline;
+}
+
+.posts:hover {
+    background-color: #bedeff49;
+    transition: 0.2s;
+}
+
+.pbody{
+    color:rgba(128, 128, 128, 0.801);
+}
+
+.pcontent{
+    color:black;
 }

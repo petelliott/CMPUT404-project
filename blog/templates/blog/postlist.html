@@ -16,21 +16,22 @@
   </div>
  
   <div class="content">
-      <div class="posts">            
-          <ul>
-            {% for post in posts %}
-            <li>
-              <a href="{% url 'viewpost' post.pk|urlencode:"" %}">{{ post.title }}</a>
-              --
-              <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
-              <span>{{ post.date }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-      </div>
-  </div>
 
-  
+    {% for post in posts %}
+    <div class="posts" onclick="location.href='{% url 'viewpost' post.pk|urlencode:"" %}';">
+      <div class="phead">
+        <div class="ptitle">{{ post.title }}</div>
+      </div>
+      <div class="pbody">
+        Posted by <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
+        on <span>{{ post.date }}</span><br><br>
+        <div class="pcontent">{{ post.content }}</div>
+      </div>
+    </div>
+    {% endfor %}
+
+
+  </div>
 
 </div>
 
