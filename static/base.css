@@ -119,8 +119,20 @@ body {
 a.nolinkstyle {
     text-decoration: none;
     color: white;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 friend-request {
     display: inline;
+}
+
+.textpadding{
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.baroption p{
+    padding-left: 15px;
+    padding-right: 15px; 
 }
