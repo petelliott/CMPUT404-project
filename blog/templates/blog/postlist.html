@@ -4,6 +4,7 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'blog/postfeed.css'%}">{% endblock %}
 {% block content %}
 
+{% if user and user.is_authenticated and user.author%}
 <div class="create-post">
   <form id = 'p' action="{% url 'post' %}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
     {% csrf_token %}
@@ -20,6 +21,7 @@
   
   <script type="text/javascript" src = "{% static 'blog/index.js'%}" ></script>
 </div>
+{% endif %}
 
 <div class="home-body">
   <div class="navigation">
