@@ -6,6 +6,8 @@
     border-width: 1px;
     padding: 20px 20px 20px 20px;
     overflow: auto;
+    background-color: white;
+    border-bottom: 2px solid #2e7acd;
 }
 
 .profile-body{
@@ -14,8 +16,9 @@
     border-style: solid;
     border-color: lightgray;
     border-width: 1px;
-    padding: 10px 20px;
+
     overflow: auto;
+    background-color: white;
 }
 
 .friends{
@@ -165,4 +168,42 @@ form div {
     border-radius: 5px;
     background-color: #f2f2f2;
     padding: 20px;
+}
+
+
+.posts {
+    padding: 10px 20px 10px 20px;
+    list-style-type:none;
+    border-bottom: 1px solid lightgray;
+    background-color: white;
+    cursor: pointer;
+}
+
+.ptitle {
+    color: black;
+    font-size: 15pt;
+    font-weight: 800;
+}
+
+.posts a {
+    text-decoration: none;
+    color: grey;
+    font-weight: 1000;
+}
+
+.posts a:hover {
+    text-decoration: underline;
+}
+
+.posts:hover {
+    background-color: #bedeff49;
+    transition: 0.2s;
+}
+
+.pbody{
+    color:rgba(128, 128, 128, 0.801);
+}
+
+.pcontent{
+    color:black;
 }
