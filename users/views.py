@@ -92,6 +92,14 @@ def logout(request):
             return redirect("login")
     return redirect("login")
 
+
+def date_format_converter(date):
+    if 'T' in date:
+        post_date = date.split('T')[0]
+    else:
+        post_date = date
+    return post_date
+
 def getExtAuthorPosts(author_origin):
     '''
     Given the externalID of a Author. This function will return a lists of all Public posts for that Author
@@ -105,7 +113,7 @@ def getExtAuthorPosts(author_origin):
         post_user = auth.models.User(username=p['author']['displayName'])
 
         post_author = models.Author(id=p['author']['id'] ,user = post_user)
-        posts.append(blog.models.Post(id=p['source'], date=p['published'], title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
+        posts.append(blog.models.Post(id=p['source'], date=date_format_converter(p['published']), title=p['title'], content=p['content'], author=post_author, content_type=p['contentType']))
 
     return posts
 
@@ -118,7 +126,11 @@ def extProfile(request, author_id):
         authentication = models.Node.URItoAuth(unquote(author_id))
         author_json = requests.get(unquote(author_id), headers=authentication).json()
         user = auth.models.User(username=author_json['displayName'])
-        author = models.Author(id=author_json['id'] ,user = user)
+        if 'github' in author_json:
+            ghub = author_json['github']
+        else:
+            ghub = None
+        author = models.Author(id=author_json['id'] ,user = user, github=ghub)
     except:
         # User does not exist if unable to get
         user = auth.models.User(username="User Does Not Exist")

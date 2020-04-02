@@ -25,7 +25,7 @@
       <div class="pbody">
         Posted by <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
         on <span>{{ post.date }}</span><br><br>
-        <div class="pcontent">{{ post.content }}</div>
+        <div class="pcontent">{{ post.content|truncatechars:80 }}</div>
       </div>
     </div>
     {% endfor %}
