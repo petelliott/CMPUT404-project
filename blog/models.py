@@ -3,6 +3,7 @@ from users.models import Author, extAuthor
 import polarbear.settings
 import requests
 import dateutil
+import datetime
 
 class Privacy:
     #TODO: private to specific author

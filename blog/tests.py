@@ -1,6 +1,6 @@
 from django.test import TestCase
-from .models import Post, Privacy
-from users.models import Author
+from .models import Post, Privacy, Comment
+from users.models import Author, extAuthor
 from .util import paginate
 import itertools
 import datetime
@@ -114,8 +114,35 @@ class PaginateTestCase(TestCase):
         self.assertEqual((3,4), tuple(paginate(l, 1, 3)))
         self.assertEqual((), tuple(paginate(l, 2, 3)))
         self.assertEqual((), tuple(paginate(l, 3, 3)))
-        
-        
+
+
+class CommentTest(TestCase):
+    def setUp(self):
+        self.author_A = Author.signup("a", "pw", "pw")
+        self.author_B = Author.signup("b", "pw", "pw")
+
+        self.post = Post.objects.create(date=datetime.date.today(),
+                                        title="a",
+                                        content="a",
+                                        author=self.author_A,
+                                        privacy=Privacy.PUBLIC)
+
+    def test_local_comment(self):
+        base = len(self.post.comments.all())
+        a = self.post.comment(self.author_A, "hey")
+        self.assertEqual(base+1, len(self.post.comments.all()))
+        b = self.post.comment(self.author_B, "ho")
+        self.assertEqual(base+2, len(self.post.comments.all()))
+        self.assertTrue(a in self.post.comments.all())
+        self.assertTrue(b in self.post.comments.all())
+
+    def test_remote_comment(self):
+        base = len(self.post.comments.all())
+        u = extAuthor.objects.create(url="https://aaaaaaaa.aa/api/authors/1")
+        a = self.post.comment(u, "hey")
+        self.assertEqual(base+1, len(self.post.comments.all()))
+        self.assertTrue(a in self.post.comments.all())
+
 
 class SpongTest(TestCase):
     # Testing Method
@@ -134,9 +161,8 @@ class SpongTest(TestCase):
         for n in nodes:
             n.delete()
         users.models.User.objects.filter(username='qianyutest3').delete()
-    
-    
+
+
     def test(self):
         # TODO
         pass
-    
