@@ -338,7 +338,10 @@ def friends(request):
     if author is None:
         return redirect("login")
 
+    form = PostForm()
+
     return render(request, "blog/postlist.html",
                   {"posts": author.friends_posts(),
                    "title": "Friend's Posts",
-                   "fPosts": True})
+                   "fPosts": True,
+                   "form": form})
