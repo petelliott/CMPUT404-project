@@ -56,14 +56,32 @@ response:
                 "id": "http://localhost:8000/api/author/1",
                 "url": "http://localhost:8000/api/author/1"
             },
-            "content": "5",
+            "comments": [
+                {
+                    "author": {
+                        "displayName": "a",
+                        "github": null,
+                        "host": "http://localhost:8000/api/",
+                        "id": "http://localhost:8000/api/author/1",
+                        "url": "http://localhost:8000/api/author/1"
+                    },
+                    "comment": "heyyy",
+                    "contentType": "text/plain",
+                    "id": "2",
+                    "published": "2020-04-03"
+                }
+            ],
+            "content": "newly put content",
             "contentType": "text/plain",
+            "count": 2,
             "description": null,
-            "id": 12,
-            "origin": "http://localhost:8000/api/posts/12",
-            "published": "2020-03-11",
-            "source": "http://localhost:8000/api/posts/12",
-            "title": "api post",
+            "id": 1,
+            "next": "http://localhost:8000/api/posts/1/comments",
+            "origin": "http://localhost:8000/api/posts/1",
+            "published": "2020-03-07",
+            "size": 25,
+            "source": "http://localhost:8000/api/posts/1",
+            "title": "old",
             "unlisted": false,
             "visibility": "PUBLIC",
             "visibleTo": null
@@ -161,6 +179,83 @@ response:
     "visibleTo": null
 }
 ```
+### GET /posts/{POST_ID}/comments
+
+returns comments on the post associated with `POST_ID`
+
+#### example
+
+request:
+```
+GET /api/posts/1/comments HTTP/1.1
+```
+
+response:
+```json
+{
+    "comments": [
+        {
+            "author": {
+                "displayName": "a",
+                "github": null,
+                "host": "http://localhost:8000/api/",
+                "id": "http://localhost:8000/api/author/1",
+                "url": "http://localhost:8000/api/author/1"
+            },
+            "comment": "heyyy",
+            "contentType": "text/plain",
+            "id": "1",
+            "published": "2020-04-03"
+        },
+        {
+            "author": {
+                "displayName": "a",
+                "github": null,
+                "host": "http://localhost:8000/api/",
+                "id": "http://localhost:8000/api/author/1",
+                "url": "http://localhost:8000/api/author/1"
+            },
+            "comment": "heyyy",
+            "contentType": "text/plain",
+            "id": "2",
+            "published": "2020-04-03"
+        }
+    ],
+    "count": 2,
+    "query": "comments",
+    "size": 25
+}
+```
+### POST /posts/{POST_ID}/comments
+
+creates a new comment on the post associated with `POST_ID`
+
+#### example
+
+request:
+```json
+POST /api/posts/1/comments HTTP/1.1
+
+{
+    "query": "addComment",
+    "comment": {
+        "author": {
+            "id": "http://localhost:8000/api/author/1",
+        },
+        "comment": "heyyy"
+    }
+}
+```
+
+response:
+```json
+{
+    "query": "addComment",
+    "success": true,
+    "message": "Comment Added"
+}
+```
+
 ### POST /posts
 
 creates a new post, then redirects to it
