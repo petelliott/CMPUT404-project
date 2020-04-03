@@ -186,9 +186,14 @@ def extProfile(request, author_id):
     elif request.method == 'GET':
         pass
 
+    if you:
+        follows = you.follows(author)
+    else:
+        follows = False
+
     return render(request, "users/profile.html",
                         {"author": author,
-                        "follows": you.follows(author),
+                        "follows": follows,
                         "posts": posts,
                         #TODO: Change this to not just get friends
                         "followers": author_json['friends'],
@@ -288,12 +293,16 @@ def localFriends(request, author_id):
         data = requests.get(f.url, headers=authentication).json()
         remote_r.append((data['id'], data['displayName']))
 
+    if you:
+        freqs = you.get_friend_requests()
+    else:
+        freqs = []
     return render(request, "users/friends.html",
                     {"author": author,
                     "friends": author.get_friends(),
                     "ext_friend": remote,
                     "ext_freqs": remote_r,
-                    "freqs": you.get_friend_requests()})
+                    "freqs": freqs})
 
 
 

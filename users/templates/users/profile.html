@@ -12,7 +12,7 @@
 <div class="profile-header"> 
   {% if author and author.user == user %}
     <button type="button" id="editProfileButton" class="follow button">Edit Profile</button>
-  {% elif not DNE %}
+  {% elif not DNE and user.is_authenticated%}
     <form action="{% url 'profile' author.pk|urlencode:"" %}" method="post">
       {% csrf_token %}
       {% if follows %}
