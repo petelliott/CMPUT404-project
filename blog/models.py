@@ -1,8 +1,9 @@
 from django.db import models
-from users.models import Author
+from users.models import Author, extAuthor
 import polarbear.settings
 import requests
 import dateutil
+import datetime
 
 class Privacy:
     #TODO: private to specific author
@@ -116,6 +117,31 @@ class Post(models.Model):
         else:
             return self.viewable_by(user)
 
+    def comment(self, author, comment):
+        if isinstance(author, Author):
+            return Comment.objects.create(
+                date=datetime.date.today(),
+                comment=comment,
+                post=self,
+                author=author)
+        elif isinstance(author, extAuthor):
+            return Comment.objects.create(
+                date=datetime.date.today(),
+                comment=comment,
+                post=self,
+                rauthor=author)
+        else:
+            raise TypeError("invalid author type")
+
+
     @classmethod
     def public(cls):
         return cls.objects.filter(privacy=Privacy.PUBLIC).order_by("-pk")
+
+class Comment(models.Model):
+    date    = models.DateField()
+    comment = models.CharField(max_length=8192)
+    post    = models.ForeignKey(Post, on_delete=models.CASCADE,
+                                related_name='comments')
+    author  = models.ForeignKey(Author, on_delete=models.CASCADE, null=True)
+    rauthor  = models.ForeignKey(extAuthor, on_delete=models.CASCADE, null=True)

@@ -3,7 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from blog.util import paginate
 from blog.models import Privacy, Post
-from users.models import Author
+from users.models import Author, Node
 from users import models
 from django.contrib import auth
 from django.views.decorators.http import require_POST
@@ -106,7 +106,14 @@ def serialize_post(request, post):
         "contentType": post.content_type,
         "content": post.content, #TODO: images
         "author": serialize_author(request, post.author),
-        #TODO: comments
+
+        #TODO: comment pagination
+        "count": len(post.comments.all()),
+        "size": DEFAULT_PAGE_SIZE,
+        "next": api_reverse(request, "api_post_comments", post_id=post.pk),
+        "comments": [serialize_comment(request, c)
+                     for c in paginate(post.comments.all(), 0, 5)],
+
         "published": post.date,
         "id": post.pk,
         "visibility": visibility_table[post.privacy],
@@ -114,6 +121,24 @@ def serialize_post(request, post):
         "unlisted": post.privacy == Privacy.URL_ONLY
     }
 
+def serialize_comment(request, comment):
+    if comment.author is not None:
+        author = serialize_author(request, comment.author)
+    else:
+        #TODO: idk if we will ever have remote comments.
+        author = {
+            "id": comment.rauthor.url,
+            "host": None,
+            "displayName": None,
+        }
+
+    return {
+        "author": author,
+        "comment": comment.comment,
+        "contentType": "text/plain",
+        "published": comment.date,
+        "id": str(comment.pk),
+    }
 
 @csrf_exempt
 @auth_api
@@ -212,9 +237,52 @@ def post(request, post_id):
     return JsonResponse(serialize_post(request, post))
 
 
+@csrf_exempt
 @auth_api
 def post_comments(request, post_id):
-    pass
+    post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        aid = data["comment"]["author"]["id"]
+        if aid.startswith(request_host(request)):
+            author = models.Author.objects.get(
+                pk=int(aid.split("/")[-1]))
+        else:
+            try:
+                author = models.extAuthor.objects.get(url=aid)
+            except ObjectDoesNotExist:
+                author = models.extAuthor.objects.create(url=aid)
+
+        post.comment(author, data["comment"]["comment"])
+        return JsonResponse({
+            "query": "addComment",
+            "success": True,
+            "message": "Comment Added"
+        })
+    else:
+        comments = [serialize_comment(request, c) for c in post.comments.all()]
+        page = int(request.GET.get("page", 0))
+        size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
+
+        total = len(comments)
+
+        def pageurl(n):
+            return "{}?page={}&size={}".format(
+                urlbase, n, size)
+
+        nex = {"next": pageurl(page+1) } if (page+1)*size < total else {}
+        prev = {"previous": pageurl(page-1) } if page > 0 else {}
+
+        comments = list(paginate(comments, page, size))
+        return JsonResponse({
+            "query": "comments",
+            "count": total,
+            "size": size,
+            **nex,
+            **prev,
+            "comments": comments
+        })
 
 
 @csrf_exempt
