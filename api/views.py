@@ -111,7 +111,7 @@ def serialize_post(request, post):
         "count": len(post.comments.all()),
         "size": DEFAULT_PAGE_SIZE,
         "next": api_reverse(request, "api_post_comments", post_id=post.pk),
-        "comments": [serialize_comment(c)
+        "comments": [serialize_comment(request, c)
                      for c in paginate(post.comments.all(), 0, 5)],
 
         "published": post.date,
@@ -123,7 +123,7 @@ def serialize_post(request, post):
 
 def serialize_comment(request, comment):
     if comment.author is not None:
-        author = serialize_author(comment.author)
+        author = serialize_author(request, comment.author)
     else:
         #TODO: idk if we will ever have remote comments.
         author = {
@@ -136,7 +136,7 @@ def serialize_comment(request, comment):
         "author": author,
         "comment": comment.comment,
         "contentType": "text/plain",
-        "published": post.date,
+        "published": comment.date,
         "id": str(comment.pk),
     }
 
@@ -243,9 +243,25 @@ def post_comments(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
 
     if request.method == "POST":
-        pass
+        data = json.loads(request.body)
+        aid = data["comment"]["author"]["id"]
+        if aid.startswith(request_host(request)):
+            author = models.Author.objects.get(
+                pk=int(aid.split("/")[-1]))
+        else:
+            try:
+                author = models.extAuthor.objects.get(url=aid)
+            except ObjectDoesNotExist:
+                author = models.extAuthor.objects.create(url=aid)
+
+        post.comment(author, data["comment"]["comment"])
+        return JsonResponse({
+            "query": "addComment",
+            "success": True,
+            "message": "Comment Added"
+        })
     else:
-        comments = [serialize_comment(c) for c in post.comments.all()]
+        comments = [serialize_comment(request, c) for c in post.comments.all()]
         page = int(request.GET.get("page", 0))
         size = int(request.GET.get("size", DEFAULT_PAGE_SIZE))
 
