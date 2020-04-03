@@ -186,9 +186,14 @@ def extProfile(request, author_id):
     elif request.method == 'GET':
         pass
 
+    if you:
+        follows = you.follows(author)
+    else:
+        follows = False
+        
     return render(request, "users/profile.html",
                         {"author": author,
-                        "follows": you.follows(author),
+                        "follows": follows,
                         "posts": posts,
                         #TODO: Change this to not just get friends
                         "followers": author_json['friends'],
