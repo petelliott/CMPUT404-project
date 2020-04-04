@@ -48,6 +48,9 @@ class PostForm(forms.Form):
 
 
 
+class CommentForm(forms.Form):
+    content = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Enter your comment'}), required=True)
+
 # Date format standarlizer,
 # converting 'YYYY-MM-DDThh:mm:ss.497350-06:00' to 'YYYY-MM-DD'
 def date_format_converter(date):
@@ -237,9 +240,17 @@ def viewlocalpost(request, post_id):
             image_path = polarbear.settings.MEDIA_URL+image
 
 
+    comment_addr =    str(post.pk)+'/comment'
+    form = CommentForm()
+    comments = post.get_comments()
+    print(comments)
+
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
                    "content": content,
+                   "comment": comment_addr,
+                   "all_comment": comments,
+                   "form": form,
                    "image":  image_path})
 
 def viewpost(request, post_id):
@@ -345,3 +356,34 @@ def friends(request):
                    "title": "Friend's Posts",
                    "fPosts": True,
                    "form": form})
+
+
+def add_comment(request,post_id):
+    '''
+    '''
+    
+    post = get_object_or_404(models.Post, pk=post_id)
+    user = users.models.Author.from_user(request.user)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            content =  form.cleaned_data["content"]
+            comment  = models.Comment.objects.create( date  = datetime.date.today(),
+                                                                                                                comment = content,
+                                                                                                                post = post,
+                                                                                                                author  =  user )
+                                                                                                
+                                                                                    
+    return redirect("viewpost", post_id=post.pk)
+
+
+def remove_comment(request,post_id, comment_id):
+    '''
+    '''
+    if request.method == 'POST':
+        comment = get_object_or_404(models.Comment, pk=comment_id)
+        
+        print(comment)
+        comment.delete()                                                                        
+                                                                                
+    return redirect("viewpost", post_id=post_id)

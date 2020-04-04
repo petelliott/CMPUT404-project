@@ -87,3 +87,17 @@
     float: right;
     margin-top: 5px;
 }
+
+.comments {
+    padding: 10px 20px 10px 20px;
+    list-style-type:none;
+    border-bottom: 1px solid lightgray;
+    background-color: white;
+    cursor: pointer;
+}
+.cbody{
+    color:rgba(128, 128, 128, 0.801);
+}
+.ccontent{
+    color:black;
+}

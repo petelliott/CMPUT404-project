@@ -12,3 +12,7 @@ staticfiles/
 media
 
 .vscode/settings.json
+
+
+
+venv

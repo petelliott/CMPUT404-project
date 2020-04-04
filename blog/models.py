@@ -106,8 +106,7 @@ class Post(models.Model):
             return False
 
         return False
-
-
+        
     def get_date(self):
         return self.date
 
@@ -132,6 +131,14 @@ class Post(models.Model):
                 rauthor=author)
         else:
             raise TypeError("invalid author type")
+
+
+    def get_comments(self):
+        comments = []
+        for p in Comment.objects.all():
+            if p.post.pk == self.pk:
+                comments.append(p)
+        return comments
 
 
     @classmethod

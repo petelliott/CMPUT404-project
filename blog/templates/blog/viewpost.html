@@ -31,15 +31,41 @@
 	</div>
 </div>
 
+
+{% if user and user.is_authenticated and user.author%}
 <div class="post-comments">
     <h1>Comments</h1>
-	<form id = 'comment' action="" method="post" >
-	<textarea id="com">
-	</textarea>
+	<form id = 'comment' action="{{comment}} " method="post" >
+	{% csrf_token %}
+	{{ form.as_p }}
 	<input id="comment_button" type="submit" value="Reply">
 	</form> 
+<br>
+<br>
+<br>
+<br>
 </div>
+{% endif %}
 
+<div class="post-comments">
+{% for comment in all_comment %}
+	<div class="comments">
+		<div class="cbody">
+		Posted by <a href="{% url 'profile' comment.author.pk|urlencode:"" %}">{{ comment.author.user.username }}</a>
+		on <span>{{ comment.date }}</span><br>
+
+		{% if comment.author == user.author  %}
+		<div class="delete">
+		<form id = 'comment' action="{% url 'removeComment' post.pk|urlencode:"" comment.pk|urlencode:"" %}" method="post" >
+		{% csrf_token %}
+		<input id="comment_button" type="submit" value="delete">
+		<br>
+		{% endif %}
+		<div class="ccontent">{{comment.comment|truncatechars:80 }}</div>
+		</div>
+	</div>
+{% endfor %}
+</div>
 
 
 
