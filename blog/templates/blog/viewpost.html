@@ -47,9 +47,10 @@
 </div>
 {% endif %}
 
+
 <div class="post-comments">
-{% for comment in all_comment %}
 	<div class="comments">
+	{% for comment in all_comment %}
 		<div class="cbody">
 		Posted by <a href="{% url 'profile' comment.author.pk|urlencode:"" %}">{{ comment.author.user.username }}</a>
 		on <span>{{ comment.date }}</span><br>
@@ -61,10 +62,12 @@
 		<input id="comment_button" type="submit" value="delete">
 		<br>
 		{% endif %}
-		<div class="ccontent">{{comment.comment|truncatechars:80 }}</div>
+		<div class="ccontent">{{comment.comment }}</div>
 		</div>
+		<br>
+		{% endfor %}
 	</div>
-{% endfor %}
+
 </div>
 
 
