@@ -48,7 +48,6 @@
     padding: 10px 20px;
     text-align: center;
     font-weight: bold;
-    border-width: 1px;
     border-radius: 16px;
 }
 
@@ -71,10 +70,9 @@
     resize: none;    
     width: 100%; 
     height: 100px; 
-    resize:none;
 }
 
-.comment_button{
+#comment_button{
     color: #2e7acd;
     background-color: white;
     border: none;

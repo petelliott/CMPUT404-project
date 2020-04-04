@@ -31,16 +31,17 @@
 	</div>
 </div>
 
-{% if user and user.is_authenticated and user.author%}
 <div class="post-comments">
     <h1>Comments</h1>
-	<form action="/action_page.php">
+	<form id = 'comment' action="" method="post" >
 	<textarea id="com">
 	</textarea>
+	<input id="comment_button" type="submit" value="Reply">
 	</form> 
-	<button class="comment_button" onclick="">Reply</button>
 </div>
-{% endif %}
 
 
+
+
+  </div>
 {% endblock %}
