@@ -54,7 +54,7 @@ body {
     border: 1px solid grey;
     border-radius: 5px;
 
-    font-size: 14px;
+    font-size: 18px;
     background: #ffffff;
 }
 
@@ -83,6 +83,7 @@ body {
     border: 1px solid grey;
     border-radius: 5px;
 }
+
 .login_btn{
     background: linear-gradient(to top, #53a452, 40%, #68ca66);
     background: linear-gradient(to bottom, #2e7acd 20%, #5696b7);
@@ -92,8 +93,8 @@ body {
 .login_btn:hover{
     background: linear-gradient(to bottom, #2e7acd 100%, #5696b7);
     cursor: pointer;
-
 }
+
 .buttonlink:hover {
     background-color: white;
     color: #3f97ba;
