@@ -30,13 +30,17 @@
 		{% endif %}
 	</div>
 </div>
+
+{% if user and user.is_authenticated and user.author%}
 <div class="post-comments">
     <h1>Comments</h1>
+	<form action="/action_page.php">
+	<textarea id="com">
+	</textarea>
+	</form> 
+	<button class="comment_button" onclick="">Reply</button>
 </div>
-
-
-
-
+{% endif %}
 
 
 {% endblock %}
