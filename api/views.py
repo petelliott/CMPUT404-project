@@ -125,11 +125,12 @@ def serialize_comment(request, comment):
     if comment.author is not None:
         author = serialize_author(request, comment.author)
     else:
-        #TODO: idk if we will ever have remote comments.
+        authentication = models.Node.URItoAuth(comment.rauthor.url)
+        author_json = requests.get(comment.rauthor.url, headers=authentication).json()
         author = {
             "id": comment.rauthor.url,
-            "host": None,
-            "displayName": None,
+            "host": author_json["host"],
+            "displayName": author_json["displayName"],
         }
 
     return {
