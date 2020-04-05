@@ -179,6 +179,8 @@ def viewextpost(request, post_id):
                             author = post_author,
                             content_type= "text/plain")
 
+        
+
         return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
                    "content": "",
@@ -214,10 +216,13 @@ def viewextpost(request, post_id):
             image = post.image.__str__()
             image_path = polarbear.settings.MEDIA_URL+image
 
+
+    is_local = False
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
                    "content": content,
-                   "image":  image_path})
+                   "image":  image_path,
+                   "is_local": is_local })
 
 def viewlocalpost(request, post_id):
     '''
@@ -243,11 +248,15 @@ def viewlocalpost(request, post_id):
     form = CommentForm()
     comments = post.get_comments()
 
+
+    is_local = True
+
     return render(request, "blog/viewpost.html",
                   {"post": post, "edit": author == post.author,
                    "content": content,
                    "all_comment": comments,
                    "form": form,
+                   "is_local": is_local ,
                    "image":  image_path})
 
 def viewpost(request, post_id):

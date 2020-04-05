@@ -377,7 +377,6 @@ def following(request, author_id):
     else:
         return extFollowing(request, author_id)
 
-
 def extFollowers(request, author_id):
     '''
     This function is used to render the followers list of a remote Author
