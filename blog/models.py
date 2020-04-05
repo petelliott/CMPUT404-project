@@ -134,11 +134,7 @@ class Post(models.Model):
 
 
     def get_comments(self):
-        comments = []
-        for p in Comment.objects.all():
-            if p.post.pk == self.pk:
-                comments.append(p)
-        return comments
+        return list(self.comments.all())
 
 
     @classmethod

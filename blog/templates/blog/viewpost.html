@@ -4,7 +4,6 @@
 {% block stylesheets %}<link rel="stylesheet" type="text/css" href="{% static 'blog/viewpost.css'%}">{% endblock %}
 {% block content %}
 
-
 <div class="post-header">
 	{% if edit %}
 	<button class="editbutton" onclick="window.location.href = '{% url 'edit' post.pk %}';">Edit Post</button>
@@ -35,7 +34,7 @@
 {% if user and user.is_authenticated and user.author%}
 <div class="post-comments">
     <h1>Comments</h1>
-	<form id = 'comment' action="{{comment}} " method="post" >
+	<form id = 'comment'  action="{% url 'addcomment' post.pk %}" method="post" >
 	{% csrf_token %}
 	{{ form.as_p }}
 	<input id="comment_button" type="submit" value="Reply">
@@ -47,14 +46,13 @@
 </div>
 {% endif %}
 
-
+{% if all_comment%}
 <div class="post-comments">
-	<div class="comments">
+	
 	{% for comment in all_comment %}
 		<div class="cbody">
 		Posted by <a href="{% url 'profile' comment.author.pk|urlencode:"" %}">{{ comment.author.user.username }}</a>
 		on <span>{{ comment.date }}</span><br>
-
 		{% if comment.author == user.author  %}
 		<div class="delete">
 		<form id = 'comment' action="{% url 'removeComment' post.pk|urlencode:"" comment.pk|urlencode:"" %}" method="post" >
@@ -65,12 +63,16 @@
 		<div class="ccontent">{{comment.comment }}</div>
 		</div>
 		<br>
+		<hr>
 		{% endfor %}
-	</div>
-
+	
 </div>
+{% endif %}
 
 
-
+<script>
+document.getElementsByTagName('label')[0].style.display = 'none'
+</script>
   </div>
 {% endblock %}
+
