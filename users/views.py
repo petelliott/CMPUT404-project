@@ -288,7 +288,7 @@ def localFriends(request, author_id):
 
     remote_request = author.get_remote_friend_request()
     remote_r = []
-    for r in remote_request:
+    for f in remote_request:
         authentication = models.Node.URItoAuth(f.url)
         data = requests.get(f.url, headers=authentication).json()
         remote_r.append((data['id'], data['displayName']))
