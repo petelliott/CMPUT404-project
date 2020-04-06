@@ -12,7 +12,7 @@
 	<h2>{{ post.title }}</h2>
 	<p>Submitted by <a href="{% url 'profile' post.author.pk|urlencode:"" %}">{{ post.author.user.username }}</a>
 	on {{ post.date }}</p>
-	
+
 </div>
 <div class="post-content">
 	<div class="post-container">
@@ -38,7 +38,7 @@
 		{% csrf_token %}
 		{{ form.as_p }}
 		<input id="comment_button" type="submit" value="Reply">
-		</form> 
+		</form>
 	<br>
 	<br>
 	<br>
@@ -48,10 +48,15 @@
 
 	{% if  all_comment%}
 	<div class="post-comments">
-		
+
 		{% for comment in all_comment %}
 			<div class="cbody">
-			Posted by <a href="{% url 'profile' comment.author.pk|urlencode:"" %}">{{ comment.author.user.username }}</a>
+			  Posted by
+              {% if comment.author %}
+              <a href="{% url 'profile' comment.author.pk|urlencode:"" %}">{{ comment.author.user.username }}</a>
+              {% else %}
+              <a href="{% url 'profile' comment.rauthor.url|urlencode:"" %}">{{ comment.rauthor.name }}</a>
+              {% endif %}
 			on <span>{{ comment.date }}</span><br>
 			{% if comment.author == user.author  %}
 			<div class="delete">
@@ -65,7 +70,7 @@
 			<br>
 			<hr>
 			{% endfor %}
-		
+
 	</div>
 	{% endif %}
 {% endif %}
@@ -75,4 +80,3 @@ document.getElementsByTagName('label')[0].style.display = 'none'
 </script>
   </div>
 {% endblock %}
-

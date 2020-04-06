@@ -179,7 +179,7 @@ def viewextpost(request, post_id):
                             author = post_author,
                             content_type= "text/plain")
 
-        
+
 
         return render(request, "blog/viewpost.html",
                   {"post": post, "edit": False,
@@ -247,7 +247,11 @@ def viewlocalpost(request, post_id):
 
     form = CommentForm()
     comments = post.get_comments()
-
+    for c in comments:
+        if c.rauthor:
+            authentication = users.models.Node.URItoAuth(c.rauthor.url)
+            author_json = requests.get(c.rauthor.url, headers=authentication).json()
+            c.rauthor.name = author_json["displayName"]
 
     is_local = True
 
@@ -367,7 +371,7 @@ def friends(request):
 def add_comment(request,post_id):
     '''
     '''
-    
+
     post = get_object_or_404(models.Post, pk=post_id)
     user = users.models.Author.from_user(request.user)
     if request.method == 'POST':
@@ -375,7 +379,7 @@ def add_comment(request,post_id):
         if form.is_valid():
             content =  form.cleaned_data["content"]
             post.comment(user, content)
-                                                                                    
+
     return redirect("viewpost", post_id=post.pk)
 
 
@@ -384,7 +388,7 @@ def remove_comment(request,post_id, comment_id):
     '''
     if request.method == 'POST':
         comment = get_object_or_404(models.Comment, pk=comment_id)
-        
-        comment.delete()                                                                        
-                                                                                
+
+        comment.delete()
+
     return redirect("viewpost", post_id=post_id)
